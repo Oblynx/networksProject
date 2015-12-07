@@ -7,19 +7,37 @@ public class VirtualModem {
 	
 	public void rx(){
 		Modem modem= new Modem();
-		modem.setSpeed(1000);
+		char[] buffer= new char[5];
+		for(int i=0; i<5; i++) buffer[i]=' ';
+		int i=0, k;
+		modem.setSpeed(8000);
 		modem.setTimeout(2000);
-		int k;
 		
 		modem.write("ATd2310ithaki\r".getBytes());
-		//modem.write("ATH0\r".getBytes());
-		while(true){
+		Boolean terminate= false;
+		while(!terminate){
 			try{
+				modem.write("E6009\r".getBytes());
 				k= modem.read();
-				if (k==-1) break;
-				System.out.print((char)k);
+				if (k==-1) terminate= true;
+				else {
+					System.out.print((char)k);
+					if (i < 5)
+						buffer[i++]= (char)k;
+					else{
+						//Shift buffer
+						for(int b=0; b<4; b++) buffer[b]= buffer[b+1];
+						buffer[4]= (char)k;
+					}
+				}
 			} catch(Exception e){
-				break;
+				terminate= true;
+			}
+			if (!terminate){
+				//System.out.println("\nBUFFER: "+new String(buffer));
+				if (new String(buffer).equals("PSTOP")){
+					System.out.print("\n");
+				}
 			}
 		}
 		modem.close();
