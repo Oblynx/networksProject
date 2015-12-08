@@ -1,45 +1,76 @@
 import ithakimodem.Modem;
 
 public class VirtualModem {
-	public static void main(String[] param){
-		(new VirtualModem()).rx();
-	}
-	
-	public void rx(){
-		Modem modem= new Modem();
-		char[] buffer= new char[5];
-		for(int i=0; i<5; i++) buffer[i]=' ';
-		int i=0, k;
-		modem.setSpeed(8000);
-		modem.setTimeout(2000);
-		
+	public void RXsetup(int speed, int timeout){
+		modem.setSpeed(speed);
+		modem.setTimeout(timeout);
 		modem.write("ATd2310ithaki\r".getBytes());
-		Boolean terminate= false;
-		while(!terminate){
-			try{
-				modem.write("E6009\r".getBytes());
-				k= modem.read();
-				if (k==-1) terminate= true;
+	}
+	public void echoPacketRX(String code){
+		StringBuffer sigStart= new StringBuffer(), sigEnd= new StringBuffer(), packet= new StringBuffer();
+		ByteFlag mdk= new ByteFlag();
+		Boolean packetStart= false, packetIn= false, packetEnd= false;
+		mdk.terminate= false;
+		
+		modem.write(code.getBytes());
+		while(!mdk.terminate){
+			mdk= readByte();
+			if (!mdk.terminate){
+				// Update packet delimiter buffers
+				if(sigStart.length() < 6) sigStart.append((char)mdk.k);
 				else {
-					System.out.print((char)k);
-					if (i < 5)
-						buffer[i++]= (char)k;
-					else{
-						//Shift buffer
-						for(int b=0; b<4; b++) buffer[b]= buffer[b+1];
-						buffer[4]= (char)k;
-					}
+					sigStart.deleteCharAt(0);
+					sigStart.append((char)mdk.k);
 				}
-			} catch(Exception e){
-				terminate= true;
-			}
-			if (!terminate){
-				//System.out.println("\nBUFFER: "+new String(buffer));
-				if (new String(buffer).equals("PSTOP")){
-					System.out.print("\n");
+				if(sigEnd.length() < 5) sigEnd.append((char)mdk.k);
+				else {
+					sigEnd.deleteCharAt(0);
+					sigEnd.append((char)mdk.k);
+				}
+				// Signal accordingly
+				Boolean oldpacketStart= packetStart, oldpacketEnd= packetEnd;
+				packetStart= sigStart.toString().equals("PSTART");
+				packetEnd= sigEnd.toString().equals("PSTOP");
+				// On packet start...
+				if (!oldpacketStart && packetStart){
+					packetIn= true;
+					packet.setLength(0);
+					packet.append(sigStart.deleteCharAt(6-1).toString());
+				}
+				// While in packet transmission
+				if (packetIn) packet.append((char)mdk.k);
+				// On packet end
+				if (!oldpacketEnd && packetEnd){
+					packetIn= false;
+					processEchoPacket(packet);
+					modem.write(code.getBytes());
 				}
 			}
 		}
-		modem.close();
 	}
+
+	public void imageRX(String code){
+		
+	}
+	
+	public void close(){ modem.close(); }
+	
+	private ByteFlag readByte(){
+		ByteFlag data= new ByteFlag();
+		try{
+			data.k= modem.read();
+			if (data.k==-1) data.terminate= true;
+		} catch(Exception e){
+			data.terminate= true;
+		}
+		return data;
+	}
+	private void processEchoPacket(StringBuffer packet){
+		System.out.println(packet);
+	}
+	private static class ByteFlag{
+		public int k= 0;
+		public Boolean terminate= false;
+	}
+	private Modem modem= new Modem();
 }
