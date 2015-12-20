@@ -7,12 +7,14 @@ import java.time.Instant;
 import java.util.*;
 
 public class VirtualModem {
+	//! Dial Ithaki
 	public void RXsetup(int speed, int timeout){
 		modem= new Modem();
 		modem.setSpeed(speed);
 		modem.setTimeout(timeout);
 		modem.write("ATd2310ithaki\r".getBytes());
 	}
+	//! Request echo packages continuously, until durationMillis time has passed.
 	public ArrayList<Packet> echoPacketRX(String code, long durationMillis){
 		ArrayList<Packet> packets= new ArrayList<Packet>();
 		long startTime= System.currentTimeMillis();
@@ -23,29 +25,33 @@ public class VirtualModem {
 		}
 		return packets;
 	}
-	//! Get 1 image from Ithaki
+	//! Request 1 image from Ithaki and store it to file
 	public Packet imageRX(String code, Integer imgIdx){
 		System.out.println("Image transfer begun");
 		Packet packet= getPacket(code, jpgStart, jpgEnd, 120*1024);
-		System.out.println("Image transfer COMPLETE!");
-		processImage(packet, imgIdx);
+		if (!packet.incomplete){
+			System.out.println("Image transfer COMPLETE!");
+			processImage(packet, imgIdx);
+		} else {
+			System.out.println("TIMEOUT! Image transfer FAILED!");
+		}
 		return packet;
 	}
-	public Packet gpsRX(String code){
+	//! Request a GPS packet, calculate coordinates and request annotated map
+	public Packet gpsMapRX(String code, Integer imgIdx){
 		System.out.println("GPS receiving");
 		Packet packet= getPacket(code, gpsStart, gpsEnd, 100);
 		System.out.println("GPS RECEIVED!");
-		processGPS(packet);
-		ArrayList<Byte> empty= new ArrayList<Byte>();
-		System.out.println("GPS addendum...");
-		packet= getPacket("",empty,empty,100);
-		System.out.println("GPS addendum RECEIVED!");
-		for(byte b: packet.data)
-			System.out.print((char)b);
-		return packet;
+		String posCode= positionFromGPS(packet, code);
+		System.out.println("Generated code:  --> "+posCode+"\nGetting map...");
+		return imageRX(posCode, imgIdx);
+		/*packet= getPacket(posCode, new ArrayList<Byte>(), new ArrayList<Byte>(), 100);
+		if(packet.incomplete) System.out.println("ERROR! Package incomplete!");
+		return packet;*/
 	}
-	public ArrayList<Integer> arqRX(String ack, String nack, long durationMillis){
-		ArrayList<Integer> retries= new ArrayList<Integer>();
+	//! Implement ARQ mechanism to countermeasure transmission errors 
+	public ArrayList<Packet> arqRX(String ack, String nack, long durationMillis){
+		ArrayList<Packet> packets= new ArrayList<Packet>();
 		long startTime= System.currentTimeMillis();
 		while(System.currentTimeMillis()-startTime < durationMillis){
 			int retry= 0;
@@ -55,12 +61,14 @@ public class VirtualModem {
 				packet= getPacket(nack, echoStart, echoEnd, 100);
 				retry++;
 			}
-			retries.add(retry);
+			packet.retries= retry;
+			packets.add(packet);
 			//Got correct package
 			processARQ(packet, retry);
 		}
-		return retries;
+		return packets;
 	}
+	//! Cleanup resources
 	public void close(){ modem.close(); }
 	
 	// $$$$$  PRIVATE  $$$$$
@@ -77,16 +85,64 @@ public class VirtualModem {
 		} catch (IOException e) { e.printStackTrace(); }
 		System.out.println("Image saved to file#"+index+". Timestamp: "+Instant.now());
 	}
-	private void processGPS(Packet packet){
-		StringBuffer output= new StringBuffer();
-		int j=36;
+	//! Parse GPS packet and get string of position codes with positions > 4secs apart
+	private String positionFromGPS(Packet packet, String code){
+		StringBuffer sigcode= new StringBuffer(), curr= new StringBuffer();
+		ArrayList<StringBuffer> positionBufs= new ArrayList<StringBuffer>();
+		boolean gettingPos= false;
+		//Get all the GPGGA lines in positionBufs
 		for(byte b: packet.data){
-			if (j==0) break;
-			output.append((char)b);
-			if (((char)b) == '\n') j--;
+			if(sigcode.length() < 6) sigcode.append((char)b);
+			else{
+				sigcode.deleteCharAt(0);
+				sigcode.append((char)b);
+				if(sigcode.toString().equals(gpsPosHeader)){
+					gettingPos= true;
+					positionBufs.add(new StringBuffer());
+					curr= positionBufs.get(positionBufs.size()-1);
+				}
+				if(gettingPos) curr.append((char)b);
+				if(sigcode.substring(5).equals("\n") || sigcode.substring(5).equals("\r")){
+					gettingPos= false;
+				}
+			}
 		}
-		System.out.print(output);
-		System.out.println("\t--> GPS END <--");
+		//Extract positions from positionBuf lines
+		String[] positions= new String[9];
+		int posIdx=0;
+		boolean firstTime= true;
+		//Timestamp of each GPS signal in seconds
+		int[] time= new int[2];
+		for(StringBuffer buf: positionBufs){
+			String[] parts= buf.toString().split(",");
+			time[1]= (int)Float.parseFloat(parts[1]);
+			if (firstTime || time[1]-time[0] > 4){
+				firstTime= false;
+				time[0]= time[1];
+				String latitude= parts[2], longitude= parts[4];
+			System.out.println(latitude+" "+longitude);
+				float latFrac= Float.parseFloat(latitude)/100, longFrac= Float.parseFloat(longitude)/100;
+				int latDeg= (int)latFrac, longDeg= (int)longFrac;
+				latFrac-= latDeg; longFrac-= longDeg;
+				latFrac*= 60; longFrac*= 60;
+				int latMin= (int)(latFrac), longMin= (int)(longFrac);
+				latFrac*= 60; longFrac*= 60;
+				int latSec= Math.round(latFrac%60), longSec= Math.round(longFrac%60);
+				
+				/*int latDeg= Integer.parseInt(latitude.substring(0,2)), longDeg= Integer.parseInt(longitude.substring(1,3));
+				int latMin= Integer.parseInt(latitude.substring(2,4)), longMin= Integer.parseInt(longitude.substring(3,5));
+				int latSec= Integer.parseInt(latitude.split("\\.")[1].substring(0,2));
+				int longSec= Integer.parseInt(longitude.split("\\.")[1].substring(0,2));*/
+				//Create a position-ful gps_request_code
+				positions[posIdx++]= " T="+longDeg+longMin+longSec+latDeg+latMin+latSec;//+"\r";
+			}
+		}
+		//Buffer to concatenate all the position codes together: <code> T=... T=... ...\r
+		StringBuffer concatPos= new StringBuffer();
+		concatPos.append(code).deleteCharAt(concatPos.length()-1);
+		for(int i=0; i<posIdx; i++) concatPos.append(positions[i]);
+		concatPos.append("\r");
+		return concatPos.toString();
 	}
 	private boolean errorARQ(Packet packet){
 		StringBuffer fcsBuf= new StringBuffer();
@@ -115,17 +171,22 @@ public class VirtualModem {
 		System.out.println("\t--> Retries= "+retries);
 	}
 	
+	//! Write and read byte streams from the modem. Calculate response time and package RX time.
+	//! 	Special use if (start||end) isEmpty: show all data received to console
 	private Packet getPacket(String code, ArrayList<Byte> start, ArrayList<Byte> end, int capacity){
 		ArrayList<Byte> sigStart= new ArrayList<Byte>(), sigEnd= new ArrayList<Byte>();
 		ByteFlag mdk= new ByteFlag();
 		boolean packetStart= false, packetIn= false, packetEnd= false;
-		Packet curPack= new Packet();
+		Packet packet= new Packet();
 		mdk.terminate= false;
+		long sendTime= System.currentTimeMillis();
 		modem.write(code.getBytes());
+		//Loop until the *end delimiter* has been received
 		while(!mdk.terminate){
 			mdk= readByte();
-			if (!mdk.terminate){
-				if(start.size() == 0) curPack.data.add((byte)mdk.k);
+			if (packet.responseTimeMillis == 0) packet.responseTimeMillis= System.currentTimeMillis()-sendTime;
+			if (!mdk.terminate && !(start.isEmpty() || end.isEmpty())){
+				if(start.size() == 0) packet.data.add((byte)mdk.k);
 				else{
 					// Update packet delimiter buffer
 					if(sigStart.size() < start.size()) sigStart.add((byte)mdk.k);
@@ -145,22 +206,23 @@ public class VirtualModem {
 					// On packet start...
 					if (!oldpacketStart && packetStart){
 						packetIn= true; 
-						curPack.startTime= System.currentTimeMillis();
-						curPack.data.ensureCapacity(capacity);
-						for(int i=0; i<start.size()-1; i++) curPack.data.add(start.get(i));
+						packet.startTime= System.currentTimeMillis();
+						packet.data.ensureCapacity(capacity);
+						for(int i=0; i<start.size()-1; i++) packet.data.add(start.get(i));
 					}
-					// While in packet transmission
-					if (packetIn) curPack.data.add((byte)mdk.k);
+					// While packet is being transmitted...
+					if (packetIn) packet.data.add((byte)mdk.k);
 					// On packet end
 					if (!oldpacketEnd && packetEnd){
 						packetIn= false;
-						curPack.endTime= System.currentTimeMillis();
+						packet.endTime= System.currentTimeMillis();
 						mdk.terminate= true;
 					}
 				}
-			}
+			} else if (!mdk.terminate) System.out.print((char)mdk.k);		// start/end isEmpty
+			else packet.incomplete= true;
 		}
-		return curPack;
+		return packet;
 	}
 	
 	// $$$$$  Utils  $$$$$
@@ -201,5 +263,7 @@ public class VirtualModem {
 	private ArrayList<Byte> gpsEnd= new ArrayList<Byte>()
 		{{ try{ for(byte b: "STOP ITHAKI GPS TRACKING\r\n".getBytes("US-ASCII")) add(b); }
 		   catch (UnsupportedEncodingException e) {e.printStackTrace();} }};
+	@SuppressWarnings("serial")
+	private String gpsPosHeader= "$GPGGA";
 	private Modem modem;
 }
