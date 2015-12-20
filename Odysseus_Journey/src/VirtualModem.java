@@ -41,13 +41,17 @@ public class VirtualModem {
 	public Packet gpsMapRX(String code, Integer imgIdx){
 		System.out.println("GPS receiving");
 		Packet packet= getPacket(code, gpsStart, gpsEnd, 100);
+		if (packet.incomplete) {
+			System.out.println("Error! Packet transfer TIMEDOUT!");
+			throw new RuntimeException();
+		}
 		System.out.println("GPS RECEIVED!");
 		String posCode= positionFromGPS(packet, code);
 		System.out.println("Generated code:  --> "+posCode+"\nGetting map...");
-		return imageRX(posCode, imgIdx);
-		/*packet= getPacket(posCode, new ArrayList<Byte>(), new ArrayList<Byte>(), 100);
+		//return imageRX(posCode, imgIdx);
+		packet= getPacket(posCode, new ArrayList<Byte>(), new ArrayList<Byte>(), 100);
 		if(packet.incomplete) System.out.println("ERROR! Package incomplete!");
-		return packet;*/
+		return packet;
 	}
 	//! Implement ARQ mechanism to countermeasure transmission errors 
 	public ArrayList<Packet> arqRX(String ack, String nack, long durationMillis){
@@ -134,13 +138,15 @@ public class VirtualModem {
 				int latSec= Integer.parseInt(latitude.split("\\.")[1].substring(0,2));
 				int longSec= Integer.parseInt(longitude.split("\\.")[1].substring(0,2));*/
 				//Create a position-ful gps_request_code
-				positions[posIdx++]= " T="+longDeg+longMin+longSec+latDeg+latMin+latSec;//+"\r";
+				positions[posIdx++]= " T="+String.format("%02d", longDeg)+String.format("%02d", longMin)+
+						String.format("%02d", longSec)+String.format("%02d", latDeg)+String.format("%02d", latMin)+
+						String.format("%02d", latSec);//+"\r";
 			}
 		}
 		//Buffer to concatenate all the position codes together: <code> T=... T=... ...\r
 		StringBuffer concatPos= new StringBuffer();
 		concatPos.append(code).deleteCharAt(concatPos.length()-1);
-		for(int i=0; i<posIdx; i++) concatPos.append(positions[i]);
+		for(int i=0; i<1; i++) concatPos.append(positions[i]);
 		concatPos.append("\r");
 		return concatPos.toString();
 	}
