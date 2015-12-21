@@ -1,8 +1,8 @@
 import ithakimodem.Modem;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.*;
+import java.io.*;
 import java.time.Instant;
 import java.util.*;
 
@@ -15,30 +15,31 @@ public class VirtualModem {
 		modem.write("ATd2310ithaki\r".getBytes());
 	}
 	//! Request echo packages continuously, until durationMillis time has passed.
-	public ArrayList<Packet> echoPacketRX(String code, long durationMillis){
+	public ArrayList<Packet> echoPacketRX(String code, long durationMillis, int serial){
 		ArrayList<Packet> packets= new ArrayList<Packet>();
+		//try{PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("myfile.txt", true)));}
 		long startTime= System.currentTimeMillis();
 		while(System.currentTimeMillis()-startTime < durationMillis){
 			Packet packet= getPacket(code, echoStart, echoEnd, 100);
-			processEchoPacket(packet);
+			processEchoPacket(packet, serial);
 			packets.add(packet);
 		}
 		return packets;
 	}
 	//! Request 1 image from Ithaki and store it to file
-	public Packet imageRX(String code, Integer imgIdx){
+	public Packet imageRX(String code, int serial){
 		System.out.println("Image transfer begun");
 		Packet packet= getPacket(code, jpgStart, jpgEnd, 120*1024);
 		if (!packet.incomplete){
 			System.out.println("Image transfer COMPLETE!");
-			processImage(packet, imgIdx);
+			processImage(packet, serial);
 		} else {
 			System.out.println("TIMEOUT! Image transfer FAILED!");
 		}
 		return packet;
 	}
 	//! Request a GPS packet, calculate coordinates and request annotated map
-	public Packet gpsMapRX(String code, Integer imgIdx){
+	public Packet gpsMapRX(String code, Integer imgIdx, int secBetweenPos){
 		System.out.println("GPS receiving");
 		Packet packet= getPacket(code, gpsStart, gpsEnd, 100);
 		if (packet.incomplete) {
@@ -46,29 +47,32 @@ public class VirtualModem {
 			throw new RuntimeException();
 		}
 		System.out.println("GPS RECEIVED!");
-		String posCode= positionFromGPS(packet, code);
+		String posCode= positionFromGPS(packet, code, secBetweenPos);
 		System.out.println("Generated code:  --> "+posCode+"\nGetting map...");
 		//return imageRX(posCode, imgIdx);
 		packet= getPacket(posCode, new ArrayList<Byte>(), new ArrayList<Byte>(), 100);
 		if(packet.incomplete) System.out.println("ERROR! Package incomplete!");
 		return packet;
 	}
+	public void echoModem(String code){
+		getPacket(code, new ArrayList<Byte>(), new ArrayList<Byte>(), 100);
+	}
 	//! Implement ARQ mechanism to countermeasure transmission errors 
-	public ArrayList<Packet> arqRX(String ack, String nack, long durationMillis){
+	public ArrayList<Packet> arqRX(String ack, String nack, long durationMillis, int serial){
 		ArrayList<Packet> packets= new ArrayList<Packet>();
 		long startTime= System.currentTimeMillis();
 		while(System.currentTimeMillis()-startTime < durationMillis){
 			int retry= 0;
 			Packet packet= getPacket(ack, echoStart, echoEnd, 100);
-			//If transmission error, resend
+			//If transmission error, request again...
 			while (errorARQ(packet)){
-				packet= getPacket(nack, echoStart, echoEnd, 100);
+				packet= getPacket(nack, new ArrayList<Byte>(), new ArrayList<Byte>(), 100);//echoStart, echoEnd, 100);
 				retry++;
 			}
 			packet.retries= retry;
-			packets.add(packet);
 			//Got correct package
-			processARQ(packet, retry);
+			processARQ(packet, retry, serial);
+			packets.add(packet);
 		}
 		return packets;
 	}
@@ -76,21 +80,22 @@ public class VirtualModem {
 	public void close(){ modem.close(); }
 	
 	// $$$$$  PRIVATE  $$$$$
-	private void processEchoPacket(Packet packet){
+	private void processEchoPacket(Packet packet, Integer serial){
 		StringBuffer output= new StringBuffer();
 		for(byte b: packet.data) output.append((char)b);
-		System.out.println(output);
+		Path path= Paths.get("./log/echoes"+serial.toString()+".log");
+		packet.log(path);
 	}
-	private void processImage(Packet packet, Integer index){
-		Path path= Paths.get("./img/image"+index.toString()+".jpg");
-		Byte[] image= new Byte[packet.size()];
-		image= packet.data.toArray(image);
-		try { Files.write(path, toPrimitives(image), StandardOpenOption.CREATE);
+	private void processImage(Packet packet, Integer serial){
+		Path path= Paths.get("./img/image"+serial.toString()+".jpg");
+		Byte[] log= new Byte[packet.data.size()];
+		log= packet.data.toArray(log);
+		try { Files.write(path, toPrimitives(log), StandardOpenOption.CREATE);
 		} catch (IOException e) { e.printStackTrace(); }
-		System.out.println("Image saved to file#"+index+". Timestamp: "+Instant.now());
+		System.out.println("Image saved to file#"+serial+". Timestamp: "+Instant.now());
 	}
 	//! Parse GPS packet and get string of position codes with positions > 4secs apart
-	private String positionFromGPS(Packet packet, String code){
+	private String positionFromGPS(Packet packet, String code, int secBetweenPos){
 		StringBuffer sigcode= new StringBuffer(), curr= new StringBuffer();
 		ArrayList<StringBuffer> positionBufs= new ArrayList<StringBuffer>();
 		boolean gettingPos= false;
@@ -106,11 +111,12 @@ public class VirtualModem {
 					curr= positionBufs.get(positionBufs.size()-1);
 				}
 				if(gettingPos) curr.append((char)b);
-				if(sigcode.substring(5).equals("\n") || sigcode.substring(5).equals("\r")){
+				if(sigcode.substring(5).equals("\r")){
 					gettingPos= false;
 				}
 			}
 		}
+	System.out.println("Relevant lines: "+positionBufs.size());
 		//Extract positions from positionBuf lines
 		String[] positions= new String[9];
 		int posIdx=0;
@@ -118,43 +124,46 @@ public class VirtualModem {
 		//Timestamp of each GPS signal in seconds
 		int[] time= new int[2];
 		for(StringBuffer buf: positionBufs){
+			if(posIdx >= 9) break;
 			String[] parts= buf.toString().split(",");
 			time[1]= (int)Float.parseFloat(parts[1]);
-			if (firstTime || time[1]-time[0] > 4){
+			if (firstTime || time[1]-time[0] > secBetweenPos){
 				firstTime= false;
 				time[0]= time[1];
 				String latitude= parts[2], longitude= parts[4];
-			System.out.println(latitude+" "+longitude);
-				float latFrac= Float.parseFloat(latitude)/100, longFrac= Float.parseFloat(longitude)/100;
+				/*float latFrac= Float.parseFloat(latitude), longFrac= Float.parseFloat(longitude);
+			System.out.println(String.format("%.2f", latFrac)+" "+String.format("%.2f", longFrac));
+				latFrac/= 100; longFrac/= 100;.
 				int latDeg= (int)latFrac, longDeg= (int)longFrac;
 				latFrac-= latDeg; longFrac-= longDeg;
 				latFrac*= 60; longFrac*= 60;
 				int latMin= (int)(latFrac), longMin= (int)(longFrac);
 				latFrac*= 60; longFrac*= 60;
-				int latSec= Math.round(latFrac%60), longSec= Math.round(longFrac%60);
+				int latSec= Math.round(latFrac%60), longSec= Math.round(longFrac%60);*/
 				
-				/*int latDeg= Integer.parseInt(latitude.substring(0,2)), longDeg= Integer.parseInt(longitude.substring(1,3));
+				int latDeg= Integer.parseInt(latitude.substring(0,2)), longDeg= Integer.parseInt(longitude.substring(1,3));
 				int latMin= Integer.parseInt(latitude.substring(2,4)), longMin= Integer.parseInt(longitude.substring(3,5));
-				int latSec= Integer.parseInt(latitude.split("\\.")[1].substring(0,2));
-				int longSec= Integer.parseInt(longitude.split("\\.")[1].substring(0,2));*/
+				int latSec= (int)(Integer.parseInt(latitude.split("\\.")[1].substring(0,2))*0.6);
+				int longSec= (int)(Integer.parseInt(longitude.split("\\.")[1].substring(0,2))*0.6);
 				//Create a position-ful gps_request_code
-				positions[posIdx++]= " T="+String.format("%02d", longDeg)+String.format("%02d", longMin)+
+				positions[posIdx++]= "T="+String.format("%02d", longDeg)+String.format("%02d", longMin)+
 						String.format("%02d", longSec)+String.format("%02d", latDeg)+String.format("%02d", latMin)+
 						String.format("%02d", latSec);//+"\r";
 			}
 		}
+	System.out.println("T-codes: "+posIdx);
 		//Buffer to concatenate all the position codes together: <code> T=... T=... ...\r
 		StringBuffer concatPos= new StringBuffer();
-		concatPos.append(code).deleteCharAt(concatPos.length()-1);
-		for(int i=0; i<1; i++) concatPos.append(positions[i]);
+		concatPos.append(code)/*.deleteCharAt(concatPos.length()-1);*/.delete(5, concatPos.length());
+		for(int i=0; i<posIdx; i++) concatPos.append(positions[i]);
 		concatPos.append("\r");
 		return concatPos.toString();
 	}
 	private boolean errorARQ(Packet packet){
 		StringBuffer fcsBuf= new StringBuffer();
 		byte[] hex= new byte[16];
-		if(packet.size() != 58){
-			System.out.println("Error: packet size= "+packet.size());
+		if(packet.data.size() != 58){
+			System.out.println("Error: packet size= "+packet.data.size());
 			throw new RuntimeException();
 		}
 		//<31bytes>HEX FCS<6bytes> 
@@ -164,7 +173,6 @@ public class VirtualModem {
 		int fcs= Integer.parseInt(fcsBuf.toString());
 		//Calculate HEX xor
 		int fcsCheck= fcs(hex);
-			//System.out.println("\nCalculated FCS: "+fcsCheck);
 		return fcs != fcsCheck;
 	}
 	public int fcs(byte[] hex){
@@ -172,8 +180,11 @@ public class VirtualModem {
 		for(int i=1; i<16; i++) fcsCheck^= (int)hex[i];
 		return fcsCheck;
 	}
-	private void processARQ(Packet packet, int retries){
-		processEchoPacket(packet);
+	private void processARQ(Packet packet, int retries, Integer serial){
+		StringBuffer output= new StringBuffer();
+		for(byte b: packet.data) output.append((char)b);
+		Path path= Paths.get("./log/arques"+serial.toString()+".log");
+		packet.log(path);
 		System.out.println("\t--> Retries= "+retries);
 	}
 	
@@ -190,7 +201,7 @@ public class VirtualModem {
 		//Loop until the *end delimiter* has been received
 		while(!mdk.terminate){
 			mdk= readByte();
-			if (packet.responseTimeMillis == 0) packet.responseTimeMillis= System.currentTimeMillis()-sendTime;
+			if (packet.responseTimeMillis <= 0) packet.responseTimeMillis= System.currentTimeMillis()-sendTime;
 			if (!mdk.terminate && !(start.isEmpty() || end.isEmpty())){
 				if(start.size() == 0) packet.data.add((byte)mdk.k);
 				else{
@@ -212,7 +223,8 @@ public class VirtualModem {
 					// On packet start...
 					if (!oldpacketStart && packetStart){
 						packetIn= true; 
-						packet.startTime= System.currentTimeMillis();
+						//Only record the first time this packet reaches here (ARQ)
+						if (packet.startTime <= 0) packet.startTime= System.currentTimeMillis();
 						packet.data.ensureCapacity(capacity);
 						for(int i=0; i<start.size()-1; i++) packet.data.add(start.get(i));
 					}
