@@ -16,7 +16,6 @@ public class VirtualModem {
 	//! Request echo packages continuously, until durationMillis time has passed.
 	public ArrayList<Packet> echoPacketRX(String code, long durationMillis, int serial){
 		ArrayList<Packet> packets= new ArrayList<Packet>();
-		//try{PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("myfile.txt", true)));}
 		long startTime= System.currentTimeMillis();
 		while(System.currentTimeMillis()-startTime < durationMillis){
 			Packet packet= getPacket(code, echoStart, echoEnd, 100);
@@ -49,10 +48,10 @@ public class VirtualModem {
 		System.out.println("GPS RECEIVED!");
 		String posCode= positionFromGPS(packet, code, secBetweenPos);
 		System.out.println("Generated code:  --> "+posCode+"\nGetting map...");
-		//return imageRX(posCode, imgIdx);
-		packet= getPacket(posCode, new ArrayList<Byte>(), new ArrayList<Byte>(), 100);
+		return imageRX(posCode, imgIdx);
+		/*packet= getPacket(posCode, new ArrayList<Byte>(), new ArrayList<Byte>(), 100);
 		if(packet.incomplete) System.out.println("ERROR! Package incomplete!");
-		return packet;
+		return packet;*/
 	}
 	public void echoModem(String code){
 		getPacket(code, new ArrayList<Byte>(), new ArrayList<Byte>(), 100);
@@ -86,6 +85,7 @@ public class VirtualModem {
 			for(byte b: packet.data) output.append((char)b);
 			Path path= Paths.get("./log/echoes"+serial.toString()+".log");
 			packet.log(path);
+			//System.out.println("Echo packet received");
 		}
 	}
 	private void processImage(Packet packet, String imgName, Integer serial){

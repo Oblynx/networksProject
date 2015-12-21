@@ -2,30 +2,30 @@ import java.util.*;
 
 public class userApplication {
 	public static void main(String[] param){
-		int serial= 6, echoMsgTime=10*60000, testsSucceeded=0, i;
+		int serial= 8, echoMsgTime=5*60000, testsSucceeded=0, i, speed= 80000, timeout= 30*60000;
 		VirtualModem vm= new VirtualModem();
 		ArrayList<Packet> echoes;
-		vm.RXsetup(8000, 50000);
+		vm.RXsetup(speed, timeout);
 		
 		//Get packets for 4 minutes
-		echoes= vm.echoPacketRX("E8533\r", echoMsgTime, serial);
+		echoes= vm.echoPacketRX("E5296\r", echoMsgTime, serial);
 		for (i=0; i< echoes.size(); i++) if (echoes.get(i).incomplete) break;
 		if (i == echoes.size() && echoes.size() > 0) { testsSucceeded++; System.out.println("Test1 finish"); }
 		else System.out.println("Test1 INCOMPLETE!");
-		vm.close(); vm.RXsetup(8000, 50000);
-		if(!vm.imageRX("M3603\r", serial).incomplete) { testsSucceeded++; System.out.println("Test2 finish"); }
+		vm.close(); vm.RXsetup(speed, timeout);
+		if(!vm.imageRX("M0491\r", serial).incomplete) { testsSucceeded++; System.out.println("Test2 finish"); }
 		else System.out.println("Test2 INCOMPLETE!");
-		vm.close(); vm.RXsetup(8000, 50000);
-		if(!vm.imageRX("G1689\r", serial).incomplete) { testsSucceeded++; System.out.println("Test3 finish"); }
+		vm.close(); vm.RXsetup(speed, timeout);
+		if(!vm.imageRX("G8399\r", serial).incomplete) { testsSucceeded++; System.out.println("Test3 finish"); }
 		else System.out.println("Test3 INCOMPLETE!");
-		vm.close(); vm.RXsetup(8000, 50000);
-		if(!vm.gpsMapRX("P8568R=1004040\r", serial, 10).incomplete) { testsSucceeded++; System.out.println("Test4 finish"); }
+		vm.close(); vm.RXsetup(speed, timeout);
+		if(!vm.gpsMapRX("P2379R=1004040\r", serial, 10).incomplete) { testsSucceeded++; System.out.println("Test4 finish"); }
 		else System.out.println("Test4 INCOMPLETE!");
-		/*vm.close(); vm.RXsetup(8000, 50000);
-		echoes= vm.arqRX("Q9183\r", "R0270\r", echoMsgTime, serial);
+		vm.close(); vm.RXsetup(speed, timeout);
+		echoes= vm.arqRX("Q7717\r", "R3840\r", echoMsgTime, serial);
 		for (i=0; i< echoes.size(); i++) if (echoes.get(i).incomplete) break;
 		if (i == echoes.size() && echoes.size() > 0) { testsSucceeded++; System.out.println("Test5 finish"); }
-		else System.out.println("Test5 INCOMPLETE!");*/
+		else System.out.println("Test5 INCOMPLETE!");
 		
 		System.out.println("\t--->  Tests succedeed: "+testsSucceeded+"/5  <---");
 		vm.close();
