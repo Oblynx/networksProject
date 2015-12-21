@@ -2,7 +2,6 @@ import ithakimodem.Modem;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.*;
-import java.io.*;
 import java.time.Instant;
 import java.util.*;
 
@@ -30,9 +29,10 @@ public class VirtualModem {
 	public Packet imageRX(String code, int serial){
 		System.out.println("Image transfer begun");
 		Packet packet= getPacket(code, jpgStart, jpgEnd, 120*1024);
+		String imgName= (code.charAt(0) == 'M')? "image":"noise";
 		if (!packet.incomplete){
 			System.out.println("Image transfer COMPLETE!");
-			processImage(packet, serial);
+			processImage(packet, imgName, serial);
 		} else {
 			System.out.println("TIMEOUT! Image transfer FAILED!");
 		}
@@ -66,7 +66,7 @@ public class VirtualModem {
 			Packet packet= getPacket(ack, echoStart, echoEnd, 100);
 			//If transmission error, request again...
 			while (errorARQ(packet)){
-				packet= getPacket(nack, new ArrayList<Byte>(), new ArrayList<Byte>(), 100);//echoStart, echoEnd, 100);
+				packet= getPacket(nack, echoStart, echoEnd, 100);
 				retry++;
 			}
 			packet.retries= retry;
@@ -81,18 +81,22 @@ public class VirtualModem {
 	
 	// $$$$$  PRIVATE  $$$$$
 	private void processEchoPacket(Packet packet, Integer serial){
-		StringBuffer output= new StringBuffer();
-		for(byte b: packet.data) output.append((char)b);
-		Path path= Paths.get("./log/echoes"+serial.toString()+".log");
-		packet.log(path);
+		if(!packet.incomplete){
+			StringBuffer output= new StringBuffer();
+			for(byte b: packet.data) output.append((char)b);
+			Path path= Paths.get("./log/echoes"+serial.toString()+".log");
+			packet.log(path);
+		}
 	}
-	private void processImage(Packet packet, Integer serial){
-		Path path= Paths.get("./img/image"+serial.toString()+".jpg");
-		Byte[] log= new Byte[packet.data.size()];
-		log= packet.data.toArray(log);
-		try { Files.write(path, toPrimitives(log), StandardOpenOption.CREATE);
-		} catch (IOException e) { e.printStackTrace(); }
-		System.out.println("Image saved to file#"+serial+". Timestamp: "+Instant.now());
+	private void processImage(Packet packet, String imgName, Integer serial){
+		if(!packet.incomplete){
+			Path path= Paths.get("./img/"+imgName+serial.toString()+".jpg");
+			Byte[] log= new Byte[packet.data.size()];
+			log= packet.data.toArray(log);
+			try { Files.write(path, toPrimitives(log), StandardOpenOption.CREATE);
+			} catch (IOException e) { e.printStackTrace(); }
+			System.out.println("Image saved to file#"+serial+". Timestamp: "+Instant.now());
+		}
 	}
 	//! Parse GPS packet and get string of position codes with positions > 4secs apart
 	private String positionFromGPS(Packet packet, String code, int secBetweenPos){
@@ -163,17 +167,19 @@ public class VirtualModem {
 		StringBuffer fcsBuf= new StringBuffer();
 		byte[] hex= new byte[16];
 		if(packet.data.size() != 58){
-			System.out.println("Error: packet size= "+packet.data.size());
-			throw new RuntimeException();
+			System.out.println("[errorARQ]: Error! Packet size= "+packet.data.size());
+			//throw new RuntimeException();
+			return true;
+		} else {
+			//<31bytes>HEX FCS<6bytes> 
+			for(int i=31; i< 31+16; i++) hex[i-31]= packet.data.get(i);
+			for(int i=49; i<52; i++) fcsBuf.append( (char) ((byte)packet.data.get(i)) );	
+			//Parse fcs
+			int fcs= Integer.parseInt(fcsBuf.toString());
+			//Calculate HEX xor
+			int fcsCheck= fcs(hex);
+			return fcs != fcsCheck;
 		}
-		//<31bytes>HEX FCS<6bytes> 
-		for(int i=31; i< 31+16; i++) hex[i-31]= packet.data.get(i);
-		for(int i=49; i<52; i++) fcsBuf.append( (char) ((byte)packet.data.get(i)) );	
-		//Parse fcs
-		int fcs= Integer.parseInt(fcsBuf.toString());
-		//Calculate HEX xor
-		int fcsCheck= fcs(hex);
-		return fcs != fcsCheck;
 	}
 	public int fcs(byte[] hex){
 		int fcsCheck= (int)hex[0];
@@ -181,11 +187,13 @@ public class VirtualModem {
 		return fcsCheck;
 	}
 	private void processARQ(Packet packet, int retries, Integer serial){
-		StringBuffer output= new StringBuffer();
-		for(byte b: packet.data) output.append((char)b);
-		Path path= Paths.get("./log/arques"+serial.toString()+".log");
-		packet.log(path);
-		System.out.println("\t--> Retries= "+retries);
+		if(!packet.incomplete){
+			StringBuffer output= new StringBuffer();
+			for(byte b: packet.data) output.append((char)b);
+			Path path= Paths.get("./log/arques"+serial.toString()+".log");
+			packet.log(path);
+			//System.out.println("\t--> Retries= "+retries);
+		}
 	}
 	
 	//! Write and read byte streams from the modem. Calculate response time and package RX time.
@@ -281,7 +289,6 @@ public class VirtualModem {
 	private ArrayList<Byte> gpsEnd= new ArrayList<Byte>()
 		{{ try{ for(byte b: "STOP ITHAKI GPS TRACKING\r\n".getBytes("US-ASCII")) add(b); }
 		   catch (UnsupportedEncodingException e) {e.printStackTrace();} }};
-	@SuppressWarnings("serial")
 	private String gpsPosHeader= "$GPGGA";
 	private Modem modem;
 }
