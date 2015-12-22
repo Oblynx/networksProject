@@ -28,7 +28,7 @@ public class VirtualModem {
 	public Packet imageRX(String code, int serial){
 		System.out.println("Image transfer begun");
 		Packet packet= getPacket(code, jpgStart, jpgEnd, 120*1024);
-		String imgName= (code.charAt(0) == 'M')? "image":"noise";
+		String imgName= (code.charAt(0) == 'M')? "image":(code.charAt(0)=='G')? "noise": "map";
 		if (!packet.incomplete){
 			System.out.println("Image transfer COMPLETE!");
 			processImage(packet, imgName, serial);
@@ -62,13 +62,17 @@ public class VirtualModem {
 		long startTime= System.currentTimeMillis();
 		while(System.currentTimeMillis()-startTime < durationMillis){
 			int retry= 0;
+			long start,end;
 			Packet packet= getPacket(ack, echoStart, echoEnd, 100);
+			start= packet.startTime; end= packet.endTime;
 			//If transmission error, request again...
 			while (errorARQ(packet)){
 				packet= getPacket(nack, echoStart, echoEnd, 100);
+				end= packet.endTime;
 				retry++;
 			}
 			packet.retries= retry;
+			packet.startTime= start; packet.endTime= end;
 			//Got correct package
 			processARQ(packet, retry, serial);
 			packets.add(packet);
