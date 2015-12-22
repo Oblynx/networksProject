@@ -13,6 +13,10 @@ public class VirtualModem {
 		modem.setTimeout(timeout);
 		modem.write("ATd2310ithaki\r".getBytes());
 	}
+	//! Echoes what the modem says to the console
+	public void echoModem(String code){
+		getPacket(code, new ArrayList<Byte>(), new ArrayList<Byte>(), 100);
+	}
 	//! Request echo packages continuously, until durationMillis time has passed.
 	public ArrayList<Packet> echoPacketRX(String code, long durationMillis, int serial){
 		ArrayList<Packet> packets= new ArrayList<Packet>();
@@ -49,12 +53,6 @@ public class VirtualModem {
 		String posCode= positionFromGPS(packet, code, secBetweenPos);
 		System.out.println("Generated code:  --> "+posCode+"\nGetting map...");
 		return imageRX(posCode, imgIdx);
-		/*packet= getPacket(posCode, new ArrayList<Byte>(), new ArrayList<Byte>(), 100);
-		if(packet.incomplete) System.out.println("ERROR! Package incomplete!");
-		return packet;*/
-	}
-	public void echoModem(String code){
-		getPacket(code, new ArrayList<Byte>(), new ArrayList<Byte>(), 100);
 	}
 	//! Implement ARQ mechanism to countermeasure transmission errors 
 	public ArrayList<Packet> arqRX(String ack, String nack, long durationMillis, int serial){
@@ -172,7 +170,6 @@ public class VirtualModem {
 		byte[] hex= new byte[16];
 		if(packet.data.size() != 58){
 			System.out.println("[errorARQ]: Error! Packet size= "+packet.data.size());
-			//throw new RuntimeException();
 			return true;
 		} else {
 			//<31bytes>HEX FCS<6bytes> 
@@ -196,7 +193,6 @@ public class VirtualModem {
 			for(byte b: packet.data) output.append((char)b);
 			Path path= Paths.get("./log/arques"+serial.toString()+".log");
 			packet.log(path);
-			//System.out.println("\t--> Retries= "+retries);
 		}
 	}
 	
