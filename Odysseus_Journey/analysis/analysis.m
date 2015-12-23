@@ -12,6 +12,7 @@ retries= arques8(:,4);
 clear('echoes8','arques8');
 %}
 %% Get data 9
+%{
 load('log9_sp8000.mat');
 transferTimeARQ= arques9sp8000(:,2)-arques9sp8000(:,1);
 transferTimeECH= echoes9sp8000(:,2)-echoes9sp8000(:,1);
@@ -19,7 +20,17 @@ reactTimeECH= echoes9sp8000(:,3);
 reactTimeARQ= arques9sp8000(:,3);
 retries= arques9sp8000(:,4);
 clear('echo*','arqu*');
+%}
+%% Get data 11
+load('log12_sp80000.mat');
+transferTimeARQ= arques12(:,2)-arques12(:,1);
+transferTimeECH= echoes12(:,2)-echoes12(:,1);
+reactTimeECH= echoes12(:,3);
+reactTimeARQ= arques12(:,3);
+retries= arques12(:,4);
+clear('echo*','arqu*');
 %% remove total outliers
+%{
 outliers=3;
 transferTimeARQ= sort(transferTimeARQ);
 transferTimeARQ= transferTimeARQ(1:end-outliers);
@@ -32,6 +43,7 @@ reactTimeARQ= reactTimeARQ(1:end-outliers);
 retries= sort(retries);
 retries= retries(1:end-outliers);
 reactTime= [reactTimeECH;reactTimeARQ];
+%}
 %% Histograms
 figure(1);
 logHist(reactTime);
@@ -64,7 +76,7 @@ grid minor;
 %
 figure(6);
 [f,x]=hist(retries,length(unique(retries)));
-bar(0:4,f);
+bar(unique(retries),f);
 title('G3: Q4761-R7581, 21/12, ~23:00 -- Retries per packet');
 grid minor;
 %}
