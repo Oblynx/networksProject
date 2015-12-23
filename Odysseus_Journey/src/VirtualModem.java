@@ -1,4 +1,6 @@
 import ithakimodem.Modem;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.*;
@@ -122,7 +124,6 @@ public class VirtualModem {
 				}
 			}
 		}
-	System.out.println("Relevant lines: "+positionBufs.size());
 		//Extract positions from positionBuf lines
 		String[] positions= new String[9];
 		int posIdx=0;
@@ -137,15 +138,6 @@ public class VirtualModem {
 				firstTime= false;
 				time[0]= time[1];
 				String latitude= parts[2], longitude= parts[4];
-				/*float latFrac= Float.parseFloat(latitude), longFrac= Float.parseFloat(longitude);
-			System.out.println(String.format("%.2f", latFrac)+" "+String.format("%.2f", longFrac));
-				latFrac/= 100; longFrac/= 100;.
-				int latDeg= (int)latFrac, longDeg= (int)longFrac;
-				latFrac-= latDeg; longFrac-= longDeg;
-				latFrac*= 60; longFrac*= 60;
-				int latMin= (int)(latFrac), longMin= (int)(longFrac);
-				latFrac*= 60; longFrac*= 60;
-				int latSec= Math.round(latFrac%60), longSec= Math.round(longFrac%60);*/
 				
 				int latDeg= Integer.parseInt(latitude.substring(0,2)), longDeg= Integer.parseInt(longitude.substring(1,3));
 				int latMin= Integer.parseInt(latitude.substring(2,4)), longMin= Integer.parseInt(longitude.substring(3,5));
@@ -202,13 +194,14 @@ public class VirtualModem {
 		ArrayList<Byte> sigStart= new ArrayList<Byte>(), sigEnd= new ArrayList<Byte>();
 		ByteFlag mdk= new ByteFlag();
 		boolean packetStart= false, packetIn= false, packetEnd= false;
+		int logIdx= 0;
 		Packet packet= new Packet();
 		mdk.terminate= false;
 		long sendTime= System.currentTimeMillis();
 		modem.write(code.getBytes());
 		//Loop until the *end delimiter* has been received
 		while(!mdk.terminate){
-			mdk= readByte();
+			mdk= readByte(logIdx++);
 			if (packet.responseTimeMillis <= 0) packet.responseTimeMillis= System.currentTimeMillis()-sendTime;
 			if (!mdk.terminate && !(start.isEmpty() || end.isEmpty())){
 				if(start.size() == 0) packet.data.add((byte)mdk.k);
@@ -248,6 +241,11 @@ public class VirtualModem {
 			} else if (!mdk.terminate) System.out.print((char)mdk.k);		// start/end isEmpty
 			else packet.incomplete= true;
 		}
+		List<String> logentries= new ArrayList<>();
+		for(int i=0; i<logIdx; i++) logentries.add(String.format("%d\n",logbuffer[i]));
+		StandardOpenOption option= (new File(logPath.toString()).exists())? StandardOpenOption.APPEND: StandardOpenOption.CREATE;
+		try { Files.write(logPath, logentries,StandardOpenOption.WRITE, option);
+		} catch (IOException e) { e.printStackTrace(); }
 		return packet;
 	}
 	
@@ -257,10 +255,12 @@ public class VirtualModem {
 	    for(int i = 0; i < oBytes.length; i++) { bytes[i] = oBytes[i]; }
 	    return bytes;
 	}
-	private ByteFlag readByte(){
+	private ByteFlag readByte(int logIdx){
 		ByteFlag data= new ByteFlag();
 		try{
+			long start= System.nanoTime();
 			data.k= modem.read();
+			logbuffer[logIdx]= (System.nanoTime()-start)/1000;
 			if (data.k==-1) data.terminate= true;
 		} catch(Exception e){ data.terminate= true; }
 		return data;
@@ -269,6 +269,8 @@ public class VirtualModem {
 		public int k= 0;
 		public boolean terminate= false;
 	}
+	
+	public VirtualModem(String filename) { logPath= Paths.get("./log/"+filename+".log"); }
 	
 	// $$$$$ Members $$$$$
 	@SuppressWarnings("serial")
@@ -290,5 +292,7 @@ public class VirtualModem {
 		{{ try{ for(byte b: "STOP ITHAKI GPS TRACKING\r\n".getBytes("US-ASCII")) add(b); }
 		   catch (UnsupportedEncodingException e) {e.printStackTrace();} }};
 	private String gpsPosHeader= "$GPGGA";
+	private Path logPath;
 	private Modem modem;
+	private long[] logbuffer= new long[200*1024];	// Must never overflow from a single packet
 }
