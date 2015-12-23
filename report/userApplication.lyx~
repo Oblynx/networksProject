@@ -1,0 +1,2444 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass scrartcl
+\use_default_options true
+\begin_modules
+fixltx2e
+\end_modules
+\maintain_unincluded_children false
+\language greek
+\language_package default
+\inputencoding utf8
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2.5cm
+\rightmargin 2cm
+\bottommargin 2.5cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Δίκτυα Υπολογιστών 1
+\end_layout
+
+\begin_layout Subtitle
+.
+ 
+\lang english
+Source Code
+\lang greek
+ .
+\end_layout
+
+\begin_layout Author
+Κωνσταντίνος Σαμαράς-Τσακίρης, 7972
+\end_layout
+
+\begin_layout Date
+21/12/2015
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Όλος ο κώδικας βρίσκεται στο 
+\lang english
+Github:
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+\lang english
+\begin_inset CommandInset href
+LatexCommand href
+target "https://github.com/Oblynx/networksProject"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+
+\lang english
+userApplication [main]
+\end_layout
+
+\begin_layout Standard
+
+\lang english
+\begin_inset listings
+lstparams "language=Java,numbers=left,numberstyle={\tiny},basicstyle={\scriptsize},breaklines=true,tabsize=2"
+inline false
+status collapsed
+
+\begin_layout Plain Layout
+
+\lang english
+import java.util.*;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+public class userApplication {
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	public static void main(String[] param){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		int serial= 10, echoMsgTime=6*60000, testsSucceeded=0, i, speed= 8000,
+ timeout= 30*60000;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		VirtualModem vm= new VirtualModem();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		ArrayList<Packet> echoes;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		vm.RXsetup(speed, timeout);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		//Get packets for 4 minutes
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		echoes= vm.echoPacketRX("E6996
+\backslash
+r", echoMsgTime, serial);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		for (i=0; i< echoes.size(); i++) if (echoes.get(i).incomplete) break;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		if (i == echoes.size() && echoes.size() > 0) { testsSucceeded++; System.out.printl
+n("Test1 finish"); }
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		else System.out.println("Test1 INCOMPLETE!");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		//vm.close(); vm.RXsetup(speed, timeout);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		if(!vm.imageRX("M4660
+\backslash
+r", serial).incomplete) { testsSucceeded++; System.out.println("Test2 finish");
+ }
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		else System.out.println("Test2 INCOMPLETE!");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		vm.close(); vm.RXsetup(speed, timeout);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		if(!vm.imageRX("G9539
+\backslash
+r", serial).incomplete) { testsSucceeded++; System.out.println("Test3 finish");
+ }
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		else System.out.println("Test3 INCOMPLETE!");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		vm.close(); vm.RXsetup(speed, timeout);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		if(!vm.gpsMapRX("P5987R=1004040
+\backslash
+r", serial, 10).incomplete) { testsSucceeded++; System.out.println("Test4 finish");
+ }
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		else System.out.println("Test4 INCOMPLETE!");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		vm.close(); vm.RXsetup(speed, timeout);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		echoes= vm.arqRX("Q4761
+\backslash
+r", "R7581
+\backslash
+r", echoMsgTime, serial);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		for (i=0; i< echoes.size(); i++) if (echoes.get(i).incomplete) break;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		if (i == echoes.size() && echoes.size() > 0) { testsSucceeded++; System.out.printl
+n("Test5 finish"); }
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		else System.out.println("Test5 INCOMPLETE!");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		System.out.println("
+\backslash
+t--->  Tests succedeed: "+testsSucceeded+"/5  <---");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		vm.close();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Packet
+\end_layout
+
+\begin_layout Standard
+
+\lang english
+\begin_inset listings
+lstparams "numbers=left,numberstyle={\tiny},basicstyle={\scriptsize},breaklines=true,tabsize=2"
+inline false
+status collapsed
+
+\begin_layout Plain Layout
+
+\lang english
+import java.io.File;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+import java.io.IOException;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+import java.nio.file.*;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+import java.nio.file.StandardOpenOption;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+import java.util.ArrayList;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+import java.util.Arrays;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+import java.util.List;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+//! The main communication data object
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+public class Packet {
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	Packet() { data= new ArrayList<Byte>(); }
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	Packet(ArrayList<Byte> d) { data= new ArrayList<Byte>(d); }
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	//! Time between getting the first and last byte of the package 
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	public long rxTime() { return startTime-endTime; }
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	//! Log this packet's metadata to file
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	public void log(Path path){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		List<String> log= Arrays.asList(String.format("%d;%d;%d;%d;%b", startTime,endTim
+e,responseTimeMillis,retries,incomplete));
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		StandardOpenOption option= (new File(path.toString()).exists())? StandardOpenOpt
+ion.APPEND: StandardOpenOption.CREATE;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		try { Files.write(path, log,StandardOpenOption.WRITE, option);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		} catch (IOException e) { e.printStackTrace(); }
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	public ArrayList<Byte> data;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	public long startTime=0, endTime=0;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	//! Time between: before writing code to modem and after receiving first
+ byte back (whether that byte belongs to package or not)
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	public long responseTimeMillis=0;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	//! How many times the FCS check failed
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	public int retries=0;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	//! Whether the package has been fully received
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	public boolean incomplete= false;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\lang english
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+
+\lang english
+VirtualModem
+\end_layout
+
+\begin_layout Standard
+
+\lang english
+\begin_inset listings
+lstparams "numbers=left,numberstyle={\tiny},basicstyle={\scriptsize},breaklines=true,tabsize=2"
+inline false
+status collapsed
+
+\begin_layout Plain Layout
+
+\lang english
+import ithakimodem.Modem;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+import java.io.IOException;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+import java.io.UnsupportedEncodingException;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+import java.nio.file.*;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+import java.time.Instant;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+import java.util.*;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+public class VirtualModem {
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	//! Dial Ithaki
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	public void RXsetup(int speed, int timeout){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		modem= new Modem();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		modem.setSpeed(speed);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		modem.setTimeout(timeout);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		modem.write("ATd2310ithaki
+\backslash
+r".getBytes());
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	//! Request echo packages continuously, until durationMillis time has passed.
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	public ArrayList<Packet> echoPacketRX(String code, long durationMillis,
+ int serial){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		ArrayList<Packet> packets= new ArrayList<Packet>();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		long startTime= System.currentTimeMillis();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		while(System.currentTimeMillis()-startTime < durationMillis){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			Packet packet= getPacket(code, echoStart, echoEnd, 100);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			processEchoPacket(packet, serial);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			packets.add(packet);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		return packets;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	//! Request 1 image from Ithaki and store it to file
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	public Packet imageRX(String code, int serial){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		System.out.println("Image transfer begun");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		Packet packet= getPacket(code, jpgStart, jpgEnd, 120*1024);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		String imgName= (code.charAt(0) == 'M')? "image":(code.charAt(0)=='G')?
+ "noise": "map";
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		if (!packet.incomplete){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			System.out.println("Image transfer COMPLETE!");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			processImage(packet, imgName, serial);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		} else {
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			System.out.println("TIMEOUT! Image transfer FAILED!");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		return packet;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	//! Request a GPS packet, calculate coordinates and request annotated map
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	public Packet gpsMapRX(String code, Integer imgIdx, int secBetweenPos){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		System.out.println("GPS receiving");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		Packet packet= getPacket(code, gpsStart, gpsEnd, 100);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		if (packet.incomplete) {
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			System.out.println("Error! Packet transfer TIMEDOUT!");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			throw new RuntimeException();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		System.out.println("GPS RECEIVED!");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		String posCode= positionFromGPS(packet, code, secBetweenPos);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		System.out.println("Generated code:  --> "+posCode+"
+\backslash
+nGetting map...");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		return imageRX(posCode, imgIdx);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		/*packet= getPacket(posCode, new ArrayList<Byte>(), new ArrayList<Byte>(),
+ 100);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		if(packet.incomplete) System.out.println("ERROR! Package incomplete!");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		return packet;*/
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	public void echoModem(String code){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		getPacket(code, new ArrayList<Byte>(), new ArrayList<Byte>(), 100);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	//! Implement ARQ mechanism to countermeasure transmission errors 
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	public ArrayList<Packet> arqRX(String ack, String nack, long durationMillis,
+ int serial){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		ArrayList<Packet> packets= new ArrayList<Packet>();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		long startTime= System.currentTimeMillis();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		while(System.currentTimeMillis()-startTime < durationMillis){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			int retry= 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			long start,end;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			Packet packet= getPacket(ack, echoStart, echoEnd, 100);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			start= packet.startTime; end= packet.endTime;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			//If transmission error, request again...
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			while (errorARQ(packet)){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				packet= getPacket(nack, echoStart, echoEnd, 100);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				end= packet.endTime;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				retry++;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			packet.retries= retry;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			packet.startTime= start; packet.endTime= end;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			//Got correct package
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			processARQ(packet, retry, serial);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			packets.add(packet);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		return packets;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	//! Cleanup resources
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	public void close(){ modem.close(); }
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	// $$$$$  PRIVATE  $$$$$
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	private void processEchoPacket(Packet packet, Integer serial){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		if(!packet.incomplete){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			StringBuffer output= new StringBuffer();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			for(byte b: packet.data) output.append((char)b);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			Path path= Paths.get("./log/echoes"+serial.toString()+".log");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			packet.log(path);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			//System.out.println("Echo packet received");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	private void processImage(Packet packet, String imgName, Integer serial){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		if(!packet.incomplete){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			Path path= Paths.get("./img/"+imgName+serial.toString()+".jpg");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			Byte[] log= new Byte[packet.data.size()];
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			log= packet.data.toArray(log);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			try { Files.write(path, toPrimitives(log), StandardOpenOption.CREATE);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			} catch (IOException e) { e.printStackTrace(); }
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			System.out.println("Image saved to file#"+serial+".
+ Timestamp: "+Instant.now());
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	//! Parse GPS packet and get string of position codes with positions >
+ 4secs apart
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	private String positionFromGPS(Packet packet, String code, int secBetweenPos){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		StringBuffer sigcode= new StringBuffer(), curr= new StringBuffer();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		ArrayList<StringBuffer> positionBufs= new ArrayList<StringBuffer>();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		boolean gettingPos= false;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		//Get all the GPGGA lines in positionBufs
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		for(byte b: packet.data){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			if(sigcode.length() < 6) sigcode.append((char)b);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			else{
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				sigcode.deleteCharAt(0);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				sigcode.append((char)b);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				if(sigcode.toString().equals(gpsPosHeader)){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					gettingPos= true;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					positionBufs.add(new StringBuffer());
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					curr= positionBufs.get(positionBufs.size()-1);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				if(gettingPos) curr.append((char)b);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				if(sigcode.substring(5).equals("
+\backslash
+r")){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					gettingPos= false;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	System.out.println("Relevant lines: "+positionBufs.size());
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		//Extract positions from positionBuf lines
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		String[] positions= new String[9];
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		int posIdx=0;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		boolean firstTime= true;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		//Timestamp of each GPS signal in seconds
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		int[] time= new int[2];
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		for(StringBuffer buf: positionBufs){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			if(posIdx >= 9) break;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			String[] parts= buf.toString().split(",");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			time[1]= (int)Float.parseFloat(parts[1]);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			if (firstTime || time[1]-time[0] > secBetweenPos){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				firstTime= false;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				time[0]= time[1];
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				String latitude= parts[2], longitude= parts[4];
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				/*float latFrac= Float.parseFloat(latitude), longFrac= Float.parseFloat(longit
+ude);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			System.out.println(String.format("%.2f", latFrac)+" "+String.format("%.2f",
+ longFrac));
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				latFrac/= 100; longFrac/= 100;.
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				int latDeg= (int)latFrac, longDeg= (int)longFrac;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				latFrac-= latDeg; longFrac-= longDeg;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				latFrac*= 60; longFrac*= 60;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				int latMin= (int)(latFrac), longMin= (int)(longFrac);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				latFrac*= 60; longFrac*= 60;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				int latSec= Math.round(latFrac%60), longSec= Math.round(longFrac%60);*/
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				int latDeg= Integer.parseInt(latitude.substring(0,2)), longDeg= Integer.parseIn
+t(longitude.substring(1,3));
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				int latMin= Integer.parseInt(latitude.substring(2,4)), longMin= Integer.parseIn
+t(longitude.substring(3,5));
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				int latSec= (int)(Integer.parseInt(latitude.split("
+\backslash
+
+\backslash
+.")[1].substring(0,2))*0.6);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				int longSec= (int)(Integer.parseInt(longitude.split("
+\backslash
+
+\backslash
+.")[1].substring(0,2))*0.6);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				//Create a position-ful gps_request_code
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				positions[posIdx++]= "T="+String.format("%02d", longDeg)+String.format("%02d",
+ longMin)+
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+						String.format("%02d", longSec)+String.format("%02d", latDeg)+String.format("%
+02d", latMin)+
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+						String.format("%02d", latSec);//+"
+\backslash
+r";
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	System.out.println("T-codes: "+posIdx);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		//Buffer to concatenate all the position codes together: <code> T=...
+ T=...
+ ...
+\backslash
+r
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		StringBuffer concatPos= new StringBuffer();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		concatPos.append(code)/*.deleteCharAt(concatPos.length()-1);*/.delete(5, concatPos.
+length());
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		for(int i=0; i<posIdx; i++) concatPos.append(positions[i]);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		concatPos.append("
+\backslash
+r");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		return concatPos.toString();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	private boolean errorARQ(Packet packet){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		StringBuffer fcsBuf= new StringBuffer();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		byte[] hex= new byte[16];
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		if(packet.data.size() != 58){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			System.out.println("[errorARQ]: Error! Packet size= "+packet.data.size());
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			//throw new RuntimeException();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			return true;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		} else {
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			//<31bytes>HEX FCS<6bytes> 
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			for(int i=31; i< 31+16; i++) hex[i-31]= packet.data.get(i);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			for(int i=49; i<52; i++) fcsBuf.append( (char) ((byte)packet.data.get(i))
+ );	
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			//Parse fcs
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			int fcs= Integer.parseInt(fcsBuf.toString());
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			//Calculate HEX xor
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			int fcsCheck= fcs(hex);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			return fcs != fcsCheck;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	public int fcs(byte[] hex){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		int fcsCheck= (int)hex[0];
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		for(int i=1; i<16; i++) fcsCheck^= (int)hex[i];
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		return fcsCheck;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	private void processARQ(Packet packet, int retries, Integer serial){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		if(!packet.incomplete){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			StringBuffer output= new StringBuffer();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			for(byte b: packet.data) output.append((char)b);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			Path path= Paths.get("./log/arques"+serial.toString()+".log");
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			packet.log(path);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			//System.out.println("
+\backslash
+t--> Retries= "+retries);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	//! Write and read byte streams from the modem.
+ Calculate response time and package RX time.
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	//! 	Special use if (start||end) isEmpty: show all data received to console
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	private Packet getPacket(String code, ArrayList<Byte> start, ArrayList<Byte>
+ end, int capacity){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		ArrayList<Byte> sigStart= new ArrayList<Byte>(), sigEnd= new ArrayList<Byte>()
+;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		ByteFlag mdk= new ByteFlag();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		boolean packetStart= false, packetIn= false, packetEnd= false;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		Packet packet= new Packet();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		mdk.terminate= false;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		long sendTime= System.currentTimeMillis();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		modem.write(code.getBytes());
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		//Loop until the *end delimiter* has been received
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		while(!mdk.terminate){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			mdk= readByte();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			if (packet.responseTimeMillis <= 0) packet.responseTimeMillis= System.currentTim
+eMillis()-sendTime;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			if (!mdk.terminate && !(start.isEmpty() || end.isEmpty())){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				if(start.size() == 0) packet.data.add((byte)mdk.k);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				else{
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					// Update packet delimiter buffer
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					if(sigStart.size() < start.size()) sigStart.add((byte)mdk.k);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					else {
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+						sigStart.remove(0);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+						sigStart.add((byte)mdk.k);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					if(sigEnd.size() < end.size()) sigEnd.add((byte)mdk.k);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					else {
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+						sigEnd.remove(0);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+						sigEnd.add((byte)mdk.k);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					// Signal accordingly
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					boolean oldpacketStart= packetStart, oldpacketEnd= packetEnd;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					packetStart= sigStart.equals(start);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					packetEnd= sigEnd.equals(end);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					// On packet start...
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					if (!oldpacketStart && packetStart){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+						packetIn= true; 
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+						//Only record the first time this packet reaches here (ARQ)
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+						if (packet.startTime <= 0) packet.startTime= System.currentTimeMillis();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+						packet.data.ensureCapacity(capacity);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+						for(int i=0; i<start.size()-1; i++) packet.data.add(start.get(i));
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					// While packet is being transmitted...
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					if (packetIn) packet.data.add((byte)mdk.k);
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					// On packet end
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					if (!oldpacketEnd && packetEnd){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+						packetIn= false;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+						packet.endTime= System.currentTimeMillis();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+						mdk.terminate= true;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+					}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+				}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			} else if (!mdk.terminate) System.out.print((char)mdk.k);		// start/end isEmpty
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			else packet.incomplete= true;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		return packet;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	// $$$$$  Utils  $$$$$
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	private byte[] toPrimitives(Byte[] oBytes){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	    byte[] bytes = new byte[oBytes.length];
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	    for(int i = 0; i < oBytes.length; i++) { bytes[i] = oBytes[i]; }
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	    return bytes;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	private ByteFlag readByte(){
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		ByteFlag data= new ByteFlag();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		try{
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			data.k= modem.read();
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+			if (data.k==-1) data.terminate= true;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		} catch(Exception e){ data.terminate= true; }
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		return data;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	private static class ByteFlag{
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		public int k= 0;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		public boolean terminate= false;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	}
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	// $$$$$ Members $$$$$
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	@SuppressWarnings("serial")
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	private ArrayList<Byte> jpgStart= new ArrayList<Byte>() {{add((byte)0xFF);
+ add((byte)0xD8);}};
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	@SuppressWarnings("serial")
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	private ArrayList<Byte> jpgEnd  = new ArrayList<Byte>() {{add((byte)0xFF);
+ add((byte)0xD9);}};
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	@SuppressWarnings("serial")
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	private ArrayList<Byte> echoStart= new ArrayList<Byte>() {{ try{ for(byte
+ b: "PSTART".getBytes("US-ASCII")) add(b); }
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+																catch (UnsupportedEncodingException e) {e.printStackTrace();}
+ }};
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	@SuppressWarnings("serial")
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	private ArrayList<Byte> echoEnd= new ArrayList<Byte>()   {{ try{ for(byte
+ b: "PSTOP".getBytes("US-ASCII")) add(b); }
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+																catch (UnsupportedEncodingException e) {e.printStackTrace();}
+ }};
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	@SuppressWarnings("serial")
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	private ArrayList<Byte> gpsStart= new ArrayList<Byte>()
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		{{ try{ for(byte b: "START ITHAKI GPS TRACKING
+\backslash
+r
+\backslash
+n".getBytes("US-ASCII")) add(b); }
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		   catch (UnsupportedEncodingException e) {e.printStackTrace();} }};
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	@SuppressWarnings("serial")
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	private ArrayList<Byte> gpsEnd= new ArrayList<Byte>()
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		{{ try{ for(byte b: "STOP ITHAKI GPS TRACKING
+\backslash
+r
+\backslash
+n".getBytes("US-ASCII")) add(b); }
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+		   catch (UnsupportedEncodingException e) {e.printStackTrace();} }};
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	private String gpsPosHeader= "$GPGGA";
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+	private Modem modem;
+\end_layout
+
+\begin_layout Plain Layout
+
+\lang english
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

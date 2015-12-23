@@ -1,0 +1,45 @@
+% Encoding: UTF-8
+
+
+@Misc{ADSL,
+  Title                    = {ADSL},
+  HowPublished             = {\url{https://en.wikipedia.org/wiki/Asymmetric_digital_subscriber_line}},
+  Note                     = {23/12/2015}
+}
+
+@Misc{adsl-how-it-works,
+  Title                    = {ADSL How it works},
+  HowPublished             = {\url{http://www.i-programmer.info/programming/hardware/3119-adsl-how-it-works.html}},
+  Note                     = {23/12/2015}
+}
+
+@Misc{dial-up_not_dead,
+  Title                    = {Why Dial-Up Internet Isn't Dead Yet},
+  HowPublished             = {\url{http://time.com/3856066/aol-verizon-deal-dial-up-internet/}},
+  Note                     = {23/12/2015}
+}
+
+@Misc{EPP,
+  Title                    = {EPP},
+  HowPublished             = {\url{http://retired.beyondlogic.org/epp/epp.htm}},
+  Note                     = {23/12/2015}
+}
+
+@Misc{mobile-data,
+  Title                    = {Mobile Data - How it works},
+  HowPublished             = {\url{http://www.i-programmer.info/programming/hardware/3676-mobile-data-how-it-works.html}},
+  Note                     = {23/12/2015}
+}
+
+@Misc{serialComm,
+  Title                    = {Serial Communications, RS-232},
+  HowPublished             = {\url{http://www.taltech.com/datacollection/articles/serial_intro}},
+  Note                     = {23/12/2015}
+}
+
+@Misc{usb,
+  Title                    = {USB Overview},
+  HowPublished             = {\url{http://www.silabs.com/Support%20Documents/Software/USB_Overview.pdf}},
+  Note                     = {23/12/2015}
+}
+

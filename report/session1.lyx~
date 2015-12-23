@@ -1,0 +1,647 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass scrartcl
+\use_default_options true
+\begin_modules
+fixltx2e
+\end_modules
+\maintain_unincluded_children false
+\language greek
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2cm
+\topmargin 2.5cm
+\rightmargin 2cm
+\bottommargin 2.5cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Δίκτυα Υπολογιστών 1
+\end_layout
+
+\begin_layout Subtitle
+Μετρήσεις συνεδρίας 1
+\end_layout
+
+\begin_layout Author
+Κωνσταντίνος Σαμαράς-Τσακίρης, 7972
+\end_layout
+
+\begin_layout Date
+21/12/2015
+\end_layout
+
+\begin_layout Subsection*
+Χρόνοι απόκρισης
+\end_layout
+
+\begin_layout Standard
+Κατέγραψα 2 σχετικά μεγέθη που ορίζονται στα γραφήματα ως εξής: 
+\end_layout
+
+\begin_layout Itemize
+
+\lang english
+response time
+\lang greek
+: Χρόνος 
+\begin_inset Formula $t_{1}-t_{0}$
+\end_inset
+
+ μεταξύ αποστολής κωδικού στην Ιθάκη και παραλαβής του 1ου 
+\lang english
+byte
+\lang greek
+ της απάντησης.
+ 
+\begin_inset Formula $t_{0}$
+\end_inset
+
+: αμέσως πριν την κλήση της 
+\lang english
+modem.write()
+\lang greek
+ και 
+\begin_inset Formula $t_{1}$
+\end_inset
+
+: αμέσως μετά την επιστροφή απ'την 1η κλ´ηση στη 
+\lang english
+modem.read()
+\lang greek
+.
+\end_layout
+
+\begin_layout Itemize
+
+\lang english
+transfer time
+\lang greek
+: Χρόνος μεταξύ της παραλαβής του 1ου και του τελευταίου 
+\lang english
+byte
+\lang greek
+ του πακέτου.
+\end_layout
+
+\begin_layout Standard
+Υποθέτω όμως ότι το 
+\lang english
+G1
+\lang greek
+ αναφέρεται στο 2 ή και στο άθροισμά τους.
+\end_layout
+
+\begin_layout Standard
+Η καταγραφή των μεγεθών πραγματοποιήθηκε με την αποστολή 
+\lang english
+echo packet
+\lang greek
+ για 5 λεπτά.
+ Τα αποτελέσματα παρουσιάζονται σε ιστογράμματα με λογαριθμικό κατακόρυφο
+ άξονα, για να αποτυπώνεται καλύτερα το μεγάλο εύρος τιμών.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename /home/oblivion/ws/networks/networksProject/Odysseus_Journey/analysis/graphs/reaction9.eps
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Χρόνος απόκρισης Ιθάκης.
+ Θεωρείται ανεξάρτητος του κωδικού, οπότε εδώ φαίνονται αποτελέσματα από
+ όλους τους κωδικούς
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename /home/oblivion/ws/networks/networksProject/Odysseus_Journey/analysis/graphs/echtransfer9.eps
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename /home/oblivion/ws/networks/networksProject/Odysseus_Journey/analysis/graphs/echtotal9.eps
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\lang english
+G1
+\lang greek
+: Ιστόγραμμα χρόνου μετάδοσης πακέτων.
+ Συνολικός χρόνος: μετάδοση + απόκριση
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename /home/oblivion/ws/networks/networksProject/Odysseus_Journey/analysis/graphs/arqtransfer9.eps
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename /home/oblivion/ws/networks/networksProject/Odysseus_Journey/analysis/graphs/arqtotal9.eps
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\lang english
+G2
+\lang greek
+: Ιστόγραμμα χρόνου μετάδοσης πακέτων με μηχανισμό 
+\lang english
+ARQ
+\lang greek
+.
+ Συνολικός χρόνος: μετάδοση + απόκριση
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename /home/oblivion/ws/networks/networksProject/Odysseus_Journey/analysis/graphs/retries9.eps
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:G3:-Εκτίμηση-πιθανότητας"
+
+\end_inset
+
+
+\lang english
+G3
+\lang greek
+: Εκτίμηση πιθανότητας σφάλματος.
+ Αριθμοί επαναλήψεων αποστολής ανά πακέτο
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Εικόνες
+\end_layout
+
+\begin_layout Standard
+Εικόνες ελήφθησαν από πολλές προηγούμενες συνεδρίες, οπότε παραθέτω μερικές
+ από εκείνες.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename /home/oblivion/ws/networks/networksProject/Odysseus_Journey/img/image5.jpg
+	lyxscale 50
+	scale 70
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Ε1: Εικόνα χωρίς σφάλματα μετάδοσης
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename /home/oblivion/ws/networks/networksProject/Odysseus_Journey/img/image4.jpg
+	lyxscale 50
+	scale 70
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Ε2: Εικόνα με σφάλματα μετάδοσης
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename /home/oblivion/ws/networks/networksProject/Odysseus_Journey/img/noise7.jpg
+	lyxscale 50
+	scale 70
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Μ1: 
+\lang english
+P5987R=1004040
+\lang greek
+ -- Χάρτης 
+\lang english
+GPS
+\lang greek
+ με στίγματα
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+
+\lang english
+BER
+\end_layout
+
+\begin_layout Standard
+
+\lang english
+BER
+\lang greek
+ είναι η πιθανότητα ένα 
+\lang english
+bit
+\lang greek
+ να είναι εσφαλμένο, αν θεωρήσουμε ότι κάθε 
+\lang english
+bit 
+\lang greek
+είναι ανεξάρτητο των υπολοίπων.
+ Επομένως, με την υλοποίηση του πρωτοκόλλου 
+\lang english
+ARQ
+\lang greek
+ μπορούμε να το εκτιμήσουμε, κάνοντας την παραδοχή ότι σε κάθε εσφαλμένο
+ πακέτο συνέβη μονάχα 1 σφάλμα 
+\lang english
+bit
+\lang greek
+.
+ Τότε, αν Ν ο συνολικός αριθμός των bits που ελήφθησαν και 
+\lang english
+n
+\lang greek
+ τα σφάλματα:
+\begin_inset Formula 
+\[
+BER=\frac{n}{N}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Σε αυτή τη συνεδρία έχουν ληφθεί συνολικά 2295 πακέτα 
+\lang english
+ARQ
+\lang greek
+, καθένα μήκους 16 
+\lang english
+bytes
+\lang greek
+ (σε αυτά αντιστοιχεί ο κωδικός ανίχνευσης σφάλματος).
+ Τα συνολικά σφάλματα είναι όσες και οι επαναλήψεις, δηλαδή όπως προκύπτει
+ από το 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:G3:-Εκτίμηση-πιθανότητας"
+
+\end_inset
+
+ είναι 527.
+ Επομένως:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+BER=\frac{527}{2295\times16\times8}=0.0018
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Η κατανομή πιθανότητας του αριθμού επανεκπομπών είναι γεωμετρική.
+\end_layout
+
+\end_body
+\end_document
