@@ -6,8 +6,8 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 public class IthakiSocket {
-	public IthakiSocket(int lp, int ip, int to){
-		localPort= lp; ithakiPort= ip;
+	public IthakiSocket(int localPort_, int ithakiPort_, int timeout_){
+		localPort= localPort_; ithakiPort= ithakiPort_;
 		try {
 			ithakiAddress= InetAddress.getByName("ithaki.eng.auth.gr");
 		} catch (UnknownHostException e1) {
@@ -16,7 +16,7 @@ public class IthakiSocket {
 		try {
 			s= new DatagramSocket();
 			r= new DatagramSocket(localPort);
-			r.setSoTimeout(to);
+			r.setSoTimeout(timeout_);
 		} catch (SocketException e1) {
 			e1.printStackTrace();
 		}
