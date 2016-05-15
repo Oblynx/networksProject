@@ -27,7 +27,9 @@ public class IthakiSocket {
 		packet= new DatagramPacket(data, data.length);
 		try { r.receive(packet);
 		} catch (IOException e) {	e.printStackTrace(); }
-		return data;
+		byte[] datarcv= new byte[packet.getLength()];
+		for(int i=0; i<datarcv.length; i++) datarcv[i]= data[i];
+		return datarcv;
 	}
 
 	private InetAddress ithakiAddress;
