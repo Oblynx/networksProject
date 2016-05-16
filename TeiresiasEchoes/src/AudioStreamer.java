@@ -1,4 +1,5 @@
 import java.util.concurrent.*;
+import java.util.Arrays;
 import java.util.Stack;
 import java.io.ByteArrayOutputStream;
 import java.nio.*;
@@ -38,6 +39,7 @@ public class AudioStreamer {
         short[] decodedMsg= (adaptiveMode)? decodeAdaptive(msg): decode(msg,(short)0,beta_def);
         elasticMemory.add(decodedMsg);
       }
+      System.out.println(">>> Streaming complete! <<<");
       return null;
 		};
 		Callable<Void> playback= () -> {
@@ -47,24 +49,32 @@ public class AudioStreamer {
       	// Open audio line
         line= AudioSystem.getSourceDataLine(audioFormat);
         line.open(audioFormat, 5*packetsPerSec*packetLength*Q/8);
+        line.start();
         // Wait to buffer memory before starting playback
-        int delayPlayback= (durationSec > 5)? 5: 1;
+        int delayPlayback= durationSec/3;
+        System.out.println("[playback]: Sleeping");
         Thread.sleep(delayPlayback*1000);
         for (int i=0; i<durationSec*packetsPerSec; i++){
           while(elasticMemory.isEmpty()){
-            streamingTimeout--;
-            if (streamingTimeout==0) throw new TimeoutException("Streaming stalled!"); 
+          	line.stop();
+            if (streamingTimeout-- < 0) throw new TimeoutException("Streaming stalled!"); 
+            System.out.println("[playback]: Buffer empty");
             Thread.sleep(1000);
+            line.start();
           }
           short[] packet= elasticMemory.poll();
           byte[] bytePacket= new byte[packet.length*2];
           ByteBuffer.wrap(bytePacket).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().put(packet);
           line.write(bytePacket, 0, bytePacket.length);
         }
+        System.out.println(">>> Playback complete! <<<");
+        line.close();
       } catch(LineUnavailableException e) { System.err.println(e.getMessage()); }
 			return null;
 		};
+		
 		tasks.push(pool.submit(sourceMem));
+		tasks.push(pool.submit(playback));
 	}
 	
 	private static short[] decode(byte[] msg, short mu, short beta){
@@ -117,7 +127,7 @@ public class AudioStreamer {
 	private IthakiSocket s;
 	private Logger pitchDiffLogger, pitchSampLogger, musicDiffLogger, musicSampLogger;
 	
-	private int packetLength= 128, packetOverhead= 4, packetsPerSec= 32, streamingTimeout= 10;
+	private int packetLength= 128, packetOverhead= 4, packetsPerSec= 32, streamingTimeout= 5;
 
 	private static byte beta_def= 1;
 }

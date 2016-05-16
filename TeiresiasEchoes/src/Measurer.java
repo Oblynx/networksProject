@@ -10,6 +10,7 @@ public class Measurer {
 		this.s=s; this.echoc= echoc; this.imgc= imgc; this.soundc= soundc; this.copterc= copterc; this.echof= echof;
 		this.echof_nodelay= echof_nodelay; this.imgf1= imgf1; this.imgf2= imgf2;
 		this.tempf= tempf; this.pitchf= pitchf; this.musicf= musicf; this.copterf= copterf;
+		streamer= new AudioStreamer(pool, s, pitchf, musicf);
 	}
 	
 	public void take_measurements(int echoDelayMillis, int echototalMeasurementTimeMillis,
@@ -25,6 +26,7 @@ public class Measurer {
 		while(!tasks.empty()) try{
 			tasks.pop().get();
 		} catch(Exception e) { System.err.println(e.getMessage()); }
+		pool.shutdown();
 	}
 
 	// output: timestamp<milli>;echodelay<milli>
@@ -77,8 +79,8 @@ public class Measurer {
     }
 	}
 	private void pitchMeasurements(int durationSec){
-		ByteArrayOutputStream clip= getSoundclip(soundc+"T", durationSec, false);
-		
+		streamer.stream(soundc+"T", durationSec, 8, false, false, "pitch");
+		streamer.waitToFinish();
 	}
 	private void audioMeasurements(){}
 	private void copterMeasurements(){}
@@ -98,6 +100,7 @@ public class Measurer {
 		}
 		return image;
 	}
+	/*
 	private ByteArrayOutputStream getSoundclip(String code, int durationSec, boolean adaptiveMode){
 		assert(durationSec<32);
 		int msgSize= (adaptiveMode)? 128+4: 128;
@@ -107,6 +110,7 @@ public class Measurer {
 			clip.write(s.receive(msgSize), 0, msgSize);
 		return clip;
 	}
+	*/
 	
 	
 	private String echoc, imgc, soundc, copterc;
@@ -115,4 +119,5 @@ public class Measurer {
 	
 	private ExecutorService pool= Executors.newCachedThreadPool();
 	private Stack<Future<Void>> tasks= new Stack<Future<Void>>();
+	private AudioStreamer streamer;
 }

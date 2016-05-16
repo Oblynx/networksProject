@@ -31,6 +31,10 @@ public class IthakiSocket {
 		for(int i=0; i<datarcv.length; i++) datarcv[i]= data[i];
 		return datarcv;
 	}
+	
+	public void close(){
+		s.close(); r.close();
+	}
 
 	private InetAddress ithakiAddress;
 	private int localPort;
