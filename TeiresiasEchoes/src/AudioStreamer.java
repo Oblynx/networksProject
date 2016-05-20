@@ -9,10 +9,10 @@ import javax.sound.sampled.*;
 
 // Streams audio. Uses external executor 
 public class AudioStreamer {
-	public AudioStreamer(ExecutorService pool, IthakiSocket s, String pitchf, String musicf){
+	public AudioStreamer(ExecutorService pool, IthakiSocket s, String tonef, String musicf){
 		this.pool= pool; this.s= s;
-		pitchDiffLogger= new Logger(pitchf+"_diff");
-		pitchSampLogger= new Logger(pitchf+"_samp");
+		toneDiffLogger= new Logger(tonef+"_diff");
+		toneSampLogger= new Logger(tonef+"_samp");
 		musicDiffLogger= new Logger(musicf+"_diff");
 		musicSampLogger= new Logger(musicf+"_samp");
 	}
@@ -101,16 +101,16 @@ public class AudioStreamer {
 	// Disambiguates between loggers and then logs msg. Example: log("music","diff",msg)
 	private void log(String source, String mode, byte[] msg){
 		int pickLogger= 0;
-		if (source.equals("pitch")) pickLogger|= 1;
+		if (source.equals("tone")) pickLogger|= 1;
 		else if (source.equals("music")) pickLogger|= 2;
 		if (mode.equals("diff")) pickLogger|= 4;
 		else if (source.equals("samp")) pickLogger|= 8;
 		Logger logger;
 		switch (pickLogger){
 		case 1|4:
-			logger= pitchDiffLogger; break;
+			logger= toneDiffLogger; break;
 		case 1|8:
-			logger= pitchSampLogger; break;
+			logger= toneSampLogger; break;
 		case 2|4:
 			logger= musicDiffLogger; break;
 		case 2|8:
@@ -125,7 +125,7 @@ public class AudioStreamer {
 	private ExecutorService pool;
 	private Stack<Future<Void>> tasks= new Stack<Future<Void>>();
 	private IthakiSocket s;
-	private Logger pitchDiffLogger, pitchSampLogger, musicDiffLogger, musicSampLogger;
+	private Logger toneDiffLogger, toneSampLogger, musicDiffLogger, musicSampLogger;
 	
 	private int packetLength= 128, packetOverhead= 4, packetsPerSec= 32, streamingTimeout= 5;
 

@@ -6,20 +6,19 @@ import java.util.Stack;
 public class Measurer {
 
 	public Measurer(IthakiSocket s, String echoc, String imgc, String soundc, String copterc, String echof,
-			String echof_nodelay, String imgf1, String imgf2, String tempf, String pitchf, String musicf, String copterf){
+			String echof_nodelay, String imgf1, String imgf2, String tempf, String tonef, String musicf, String copterf){
 		this.s=s; this.echoc= echoc; this.imgc= imgc; this.soundc= soundc; this.copterc= copterc; this.echof= echof;
 		this.echof_nodelay= echof_nodelay; this.imgf1= imgf1; this.imgf2= imgf2;
-		this.tempf= tempf; this.pitchf= pitchf; this.musicf= musicf; this.copterf= copterf;
-		streamer= new AudioStreamer(pool, s, pitchf, musicf);
+		this.tempf= tempf; this.tonef= tonef; this.musicf= musicf; this.copterf= copterf;
+		streamer= new AudioStreamer(pool, s, tonef, musicf);
 	}
 	
 	public void take_measurements(int echoDelayMillis, int echototalMeasurementTimeMillis,
-			int pitchDuration){
+			int toneDuration){
 		//echoMeasurements(echoDelayMillis, echototalMeasurementTimeMillis);
 		//imgMeasurements();
 		//tempMeasurements();
-		pitchMeasurements(pitchDuration);
-		//audioMeasurements();
+		soundMeasurements(toneDuration);
 		//copterMeasurements();
 
 		// Wait for any running tasks to finish
@@ -78,12 +77,19 @@ public class Measurer {
       }
     }
 	}
-	private void pitchMeasurements(int durationSec){
-		streamer.stream(soundc+"T", durationSec, 8, false, false, "pitch");
+	private void soundMeasurements(int durationSec){
+		boolean adaptive= false;
+		// stream tone
+		streamer.stream(soundc+"T", durationSec, (adaptive)? 16: 8, adaptive, true, "tone");
+		streamer.waitToFinish();
+		// stream music
+		adaptive= true;
+		streamer.stream(soundc+"F", durationSec, (adaptive)? 16: 8, adaptive, true, "music");
 		streamer.waitToFinish();
 	}
-	private void audioMeasurements(){}
-	private void copterMeasurements(){}
+	private void copterMeasurements(){
+		
+	}
 	
 	private ByteArrayOutputStream getImage(String code){
 		ByteArrayOutputStream image= new ByteArrayOutputStream();
@@ -114,7 +120,7 @@ public class Measurer {
 	
 	
 	private String echoc, imgc, soundc, copterc;
-	private String echof, echof_nodelay, imgf1, imgf2, tempf,	pitchf, musicf, copterf;
+	private String echof, echof_nodelay, imgf1, imgf2, tempf,	tonef, musicf, copterf;
 	private IthakiSocket s;
 	
 	private ExecutorService pool= Executors.newCachedThreadPool();
