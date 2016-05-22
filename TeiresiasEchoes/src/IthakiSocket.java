@@ -89,6 +89,15 @@ public class IthakiSocket {
 		public CopterResponse(int l, int r, int a, float t, float p){
 			lmotor= l; rmotor= r; altit= a; temper= t; pressure= p;
 		}
+		public CopterResponse(int[] v){
+			assert(v.length == 5);
+			lmotor= v[0]; rmotor= v[1]; altit= v[2]; temper= v[3]; pressure= v[4];
+		}
+		public byte[] bytes(){
+			return (new String(Integer.toString(lmotor)+" "+ Integer.toString(rmotor)+" "+
+							Integer.toString(altit)+" "+ Float.toString(temper)+" "+ Float.toString(pressure)+"\n")
+						 ).getBytes();
+		}
 		public int lmotor, rmotor, altit;
 		public float temper, pressure;
 	}

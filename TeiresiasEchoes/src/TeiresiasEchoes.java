@@ -1,24 +1,37 @@
+import java.text.*;
+import java.io.File;
+import java.util.*;
+
 public class TeiresiasEchoes {
 
 	public static void main(String[] args) {
 		s.send(echoc.getBytes());
 		//System.out.println(new String(s.receive(100)));
 		
-		measurer.take_measurements(0,4000,10);
+		DateFormat df = new SimpleDateFormat("dd-MM HH:mm:ss");
+		Date today = Calendar.getInstance().getTime();
+		String logdir= "logs/"+df.format(today);
+		
+		new File(logdir).mkdirs();
+		echof= logdir+echof; echof_nodelay= logdir+echof_nodelay; imgf1= logdir+imgf1;
+		imgf2= logdir+imgf2; tempf= logdir+tempf; tonef= logdir+tonef; musicf= logdir+musicf;
+		copterf1= logdir+copterf1; copterf2= logdir+copterf2;
+		
+    //Executes the prescribed measurements
+	  Measurer measurer= new Measurer(s, echoc,imgc,soundc,copterc, echof,echof_nodelay,
+			imgf1,imgf2,tempf,tonef,musicf,copterf1,copterf2);
+		measurer.take_measurements(0,4000,10, 150,180);
 		s.close();
 	}
 	
 	
-	private static int localPort=48022, ithakiPort=38022;
-	private static String echoc="E3147", imgc="M4057", soundc="V1149", copterc="Q9364";
+	private static int localPort=48006, ithakiPort=38006;
+	private static String echoc="E4734", imgc="M8404", soundc="V5749", copterc="Q6853";
 	
-	private static String echof="logs/echo"+echoc+".log", echof_nodelay="logs/echo"+echoc+"_nodelay.log",
-					imgf1="logs/img1"+imgc+".jpg", imgf2="logs/img2"+imgc+".jpg", tempf="logs/temp"+echoc+".log",
-					tonef="logs/tone"+soundc+".log",
-					musicf="logs/music"+soundc+".log", copterf="logs/copter"+copterc+".log";
+	private static String echof="echo"+echoc+".log", echof_nodelay="echo"+echoc+"_nodelay.log",
+					imgf1="img1"+imgc+".jpg", imgf2="img2"+imgc+".jpg", tempf="temp"+echoc+".log",
+					tonef="tone"+soundc+".log", musicf="music"+soundc+".log",
+					copterf1="copter_fl1"+copterc+".log",	copterf2="copter_fl2"+copterc+".log";
 	private static IthakiSocket s= new IthakiSocket(localPort, ithakiPort, 2000);
 	
-	//Executes the prescribed measurements
-	private static Measurer measurer= new Measurer(s, echoc,imgc,soundc,copterc, echof,echof_nodelay,
-			imgf1,imgf2,tempf,tonef,musicf,copterf);
 }

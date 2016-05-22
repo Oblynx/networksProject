@@ -17,6 +17,13 @@ public class AudioStreamer {
 		musicSampLogger= new Logger(musicf+"_samp");
 	}
 	
+	public void close(){
+		toneDiffLogger.close();
+		toneSampLogger.close();
+		musicDiffLogger.close();
+		musicSampLogger.close();
+	}
+	
 	public void waitToFinish(){
 		while(!tasks.empty()) try{
 			tasks.pop().get();

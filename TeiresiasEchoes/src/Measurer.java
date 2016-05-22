@@ -6,20 +6,22 @@ import java.util.Stack;
 public class Measurer {
 
 	public Measurer(IthakiSocket s, String echoc, String imgc, String soundc, String copterc, String echof,
-			String echof_nodelay, String imgf1, String imgf2, String tempf, String tonef, String musicf, String copterf){
+			String echof_nodelay, String imgf1, String imgf2, String tempf, String tonef, String musicf,
+			String copterf1, String copterf2){
 		this.s=s; this.echoc= echoc; this.imgc= imgc; this.soundc= soundc; this.copterc= copterc; this.echof= echof;
 		this.echof_nodelay= echof_nodelay; this.imgf1= imgf1; this.imgf2= imgf2;
-		this.tempf= tempf; this.tonef= tonef; this.musicf= musicf; this.copterf= copterf;
+		this.tempf= tempf; this.tonef= tonef; this.musicf= musicf;
+		this.copterf1= copterf1; this.copterf2= copterf2;
 		streamer= new AudioStreamer(pool, s, tonef, musicf);
 	}
 	
 	public void take_measurements(int echoDelayMillis, int echototalMeasurementTimeMillis,
-			int toneDuration){
+			int toneDuration, int flightlevel1, int flightlevel2){
 		//echoMeasurements(echoDelayMillis, echototalMeasurementTimeMillis);
 		//imgMeasurements();
 		//tempMeasurements();
 		soundMeasurements(toneDuration);
-		//copterMeasurements();
+		copterMeasurements(flightlevel1, flightlevel2);
 
 		// Wait for any running tasks to finish
 		while(!tasks.empty()) try{
@@ -86,9 +88,22 @@ public class Measurer {
 		adaptive= true;
 		streamer.stream(soundc+"F", durationSec, (adaptive)? 16: 8, adaptive, true, "music");
 		streamer.waitToFinish();
+		streamer.close();
 	}
-	private void copterMeasurements(){
-		
+	private void copterMeasurements(int fl1, int fl2){
+		CopterController ctrl= new CopterController(s);
+		ctrl.setSessionTimeout(30);
+		ctrl.setControlParams(new int[]{1,1,1});
+		// session1
+		ctrl.log(true, copterf1);
+		ctrl.setFlightLevel(fl1);
+		ctrl.start();
+		//ctrl.waitTimeout();
+		// session2
+		ctrl.log(true,copterf2);
+		ctrl.setFlightLevel(fl2);
+		ctrl.start();
+		//ctrl.waitTimeout();
 	}
 	
 	private ByteArrayOutputStream getImage(String code){
@@ -120,7 +135,7 @@ public class Measurer {
 	
 	
 	private String echoc, imgc, soundc, copterc;
-	private String echof, echof_nodelay, imgf1, imgf2, tempf,	tonef, musicf, copterf;
+	private String echof, echof_nodelay, imgf1, imgf2, tempf,	tonef, musicf, copterf1, copterf2;
 	private IthakiSocket s;
 	
 	private ExecutorService pool= Executors.newCachedThreadPool();
