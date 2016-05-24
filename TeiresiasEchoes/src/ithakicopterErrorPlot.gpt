@@ -1,0 +1,7 @@
+set grid;
+set xlabel "t(s)"
+set ylabel "error"
+plot 'logs/copter_error_dataset' with lines, 0;
+pause 1;
+reread;
+

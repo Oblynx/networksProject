@@ -47,29 +47,50 @@ public class IthakiSocket {
   				flightlevel, lmotor, rmotor).getBytes());
 		} catch(IOException e) { e.printStackTrace(); }
 	}
-	public CopterResponse recAutopilot(){
-    int respLength= String.format(copterResFormat, 111,111,111,11.11,1111.11).length();
-    byte[] buf= new byte[respLength];
+	public CopterResponse rcvAutopilot(){
+    byte[] buf= new byte[copterRespLength];
+    int bytesRead= 0;
 		try{
-      int bytesRead=0;
-      do{
-        bytesRead= bytesRead + inTCP.read(buf, bytesRead, respLength);
-      } while(bytesRead < respLength);
+      while(bytesRead == 0) bytesRead= inTCP.read(buf);
 		} catch(IOException e) { e.printStackTrace(); }
 		String response= new String(buf);
+		//System.out.println("[rcv]: length="+bytesRead);
 		return parseCopterResponse(response);
+	}
+	public void initAutopilot(){
+		byte[] buf= new byte[512];
+		try {
+			do{
+        sendAutopilot(100,100,100);
+        do{
+          inTCP.read(buf);
+        } while(inTCP.available() > 0);
+			}while( parseCopterResponse(new String(buf)).isZero() );
+		} catch (IOException e) { e.printStackTrace(); }
 	}
 	
 	private CopterResponse parseCopterResponse(String response){
-		int l,r,a;
-		float t,p;
-		Scanner scanner= new Scanner(response), partScanner;
-		scanner.useDelimiter("[=\\s]");
-		l= scanner.nextInt();
-		r= scanner.nextInt();
-		a= scanner.nextInt();
-		t= scanner.nextFloat();
-		p= scanner.nextFloat();
+		int l=0,r=0,a=0;
+		float t=0,p=0;
+		if (response.startsWith("ITHAKICOPTER")){
+      //System.out.print("[parser]: "+response);
+      Scanner scanner= new Scanner(response);
+      scanner.useDelimiter("[=\\s]");
+      try{
+        while(!scanner.hasNextInt()) scanner.next();
+        l= scanner.nextInt();
+        while(!scanner.hasNextInt()) scanner.next();
+        r= scanner.nextInt();
+        while(!scanner.hasNextInt()) scanner.next();
+        a= scanner.nextInt();
+        while(!scanner.hasNextFloat()) scanner.next();
+        t= scanner.nextFloat();
+        while(!scanner.hasNextFloat()) scanner.next();
+        p= scanner.nextFloat();
+      } catch(java.util.InputMismatchException e) { System.out.println("[parser]: error!"); }
+      catch(java.util.NoSuchElementException e) { System.out.println("[parser]: no more tokens!"); }
+      scanner.close();
+		}
 		return new CopterResponse(l,r,a,t,p);
 	}
 
@@ -82,22 +103,24 @@ public class IthakiSocket {
 	private OutputStream outTCP;
 	
 	private String copterReqFormat="AUTO FLIGHTLEVEL=%03d LMOTOR=%03d RMOTOR=%03d PILOT \r\n",
-								 copterResFormat="ITHAKICOPTER LMOTOR=%03d RMOTOR=%3d ALTITUDE=%3d "
+								 copterResFormat="ITHAKICOPTER LMOTOR=%03d RMOTOR=%03d ALTITUDE=%03d "
 								 								 + "TEMPERATURE=+%2.2f PRESSURE=%4.2fTELEMETRY \r\n";
+  private int copterRespLength= String.format(copterResFormat, 111,111,111,11.11,1111.11).length()+1;
 	
 	public class CopterResponse{
 		public CopterResponse(int l, int r, int a, float t, float p){
 			lmotor= l; rmotor= r; altit= a; temper= t; pressure= p;
 		}
-		public CopterResponse(int[] v){
+		/*public CopterResponse(int[] v){
 			assert(v.length == 5);
 			lmotor= v[0]; rmotor= v[1]; altit= v[2]; temper= v[3]; pressure= v[4];
-		}
+		}*/
 		public byte[] bytes(){
 			return (new String(Integer.toString(lmotor)+" "+ Integer.toString(rmotor)+" "+
 							Integer.toString(altit)+" "+ Float.toString(temper)+" "+ Float.toString(pressure)+"\n")
 						 ).getBytes();
 		}
+		public boolean isZero() { return (lmotor|rmotor|altit)==0 && temper==0 && pressure==0; } 
 		public int lmotor, rmotor, altit;
 		public float temper, pressure;
 	}

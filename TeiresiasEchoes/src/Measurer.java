@@ -12,7 +12,6 @@ public class Measurer {
 		this.echof_nodelay= echof_nodelay; this.imgf1= imgf1; this.imgf2= imgf2;
 		this.tempf= tempf; this.tonef= tonef; this.musicf= musicf;
 		this.copterf1= copterf1; this.copterf2= copterf2;
-		streamer= new AudioStreamer(pool, s, tonef, musicf);
 	}
 	
 	public void take_measurements(int echoDelayMillis, int echototalMeasurementTimeMillis,
@@ -20,7 +19,7 @@ public class Measurer {
 		//echoMeasurements(echoDelayMillis, echototalMeasurementTimeMillis);
 		//imgMeasurements();
 		//tempMeasurements();
-		soundMeasurements(toneDuration);
+		//soundMeasurements(toneDuration);
 		copterMeasurements(flightlevel1, flightlevel2);
 
 		// Wait for any running tasks to finish
@@ -80,6 +79,7 @@ public class Measurer {
     }
 	}
 	private void soundMeasurements(int durationSec){
+		streamer= new AudioStreamer(pool, s, tonef, musicf);
 		boolean adaptive= false;
 		// stream tone
 		streamer.stream(soundc+"T", durationSec, (adaptive)? 16: 8, adaptive, true, "tone");
@@ -92,18 +92,16 @@ public class Measurer {
 	}
 	private void copterMeasurements(int fl1, int fl2){
 		CopterController ctrl= new CopterController(s);
-		ctrl.setSessionTimeout(30);
-		ctrl.setControlParams(new int[]{1,1,1});
+		ctrl.setSessionTimeout(60);
+		ctrl.setControlParams(new float[]{1.50f, 0.00000080f, 0.000009f, 110f});
 		// session1
 		ctrl.log(true, copterf1);
 		ctrl.setFlightLevel(fl1);
 		ctrl.start();
-		//ctrl.waitTimeout();
 		// session2
 		ctrl.log(true,copterf2);
 		ctrl.setFlightLevel(fl2);
 		ctrl.start();
-		//ctrl.waitTimeout();
 	}
 	
 	private ByteArrayOutputStream getImage(String code){
