@@ -41,10 +41,16 @@ public class AudioStreamer {
       int msgSize= (adaptiveMode)? packetLength+packetOverhead: packetLength;
       s.send((code+String.format("%03d", durationSec*32)).getBytes());
       for(int i=0; i<durationSec*packetsPerSec; i++){
-        byte[] msg= s.receive(msgSize);
-        if (logEnable) log(logSource, "diff", msg);
-        short[] decodedMsg= (adaptiveMode)? decodeAdaptive(msg): decode(msg,(short)0,beta_def);
-        elasticMemory.add(decodedMsg);
+      	try{
+          byte[] msg= s.receive(msgSize);
+          if (logEnable) log(logSource, "diff", msg);
+          short[] decodedMsg= (adaptiveMode)? decodeAdaptive(msg): decode(msg,(short)0,beta_def);
+          elasticMemory.add(decodedMsg);
+      	} catch(java.net.SocketTimeoutException e){
+      		streamTimeout= true;
+      		System.out.println("[streamer]: Streaming timed out");
+      		break;
+      	}
       }
       System.out.println(">>> Streaming complete! <<<");
       return null;
@@ -59,16 +65,17 @@ public class AudioStreamer {
         line.start();
         // Wait to buffer memory before starting playback
         int delayPlayback= durationSec/3;
-        System.out.println("[playback]: Sleeping");
         Thread.sleep(delayPlayback*1000);
         for (int i=0; i<durationSec*packetsPerSec; i++){
           while(elasticMemory.isEmpty()){
           	line.stop();
+          	if (elasticMemory.isEmpty() && streamTimeout) break;
             if (streamingTimeout-- < 0) throw new TimeoutException("Streaming stalled!"); 
-            System.out.println("[playback]: Buffer empty");
+            System.err.println("[playback]: Buffer empty");
             Thread.sleep(1000);
             line.start();
           }
+          if (elasticMemory.isEmpty() && streamTimeout) break;
           short[] packet= elasticMemory.poll();
           byte[] bytePacket= new byte[packet.length*2];
           ByteBuffer.wrap(bytePacket).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().put(packet);
@@ -129,6 +136,7 @@ public class AudioStreamer {
 	}
 
 	private ConcurrentLinkedQueue<short[]> elasticMemory= new ConcurrentLinkedQueue<short[]>();
+	private volatile boolean streamTimeout= false;
 	private ExecutorService pool;
 	private Stack<Future<Void>> tasks= new Stack<Future<Void>>();
 	private IthakiSocket s;

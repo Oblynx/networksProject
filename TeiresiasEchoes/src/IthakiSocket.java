@@ -27,11 +27,15 @@ public class IthakiSocket {
 		try { s.send(packet);
 		} catch (IOException e) { e.printStackTrace(); }
 	}
-	public byte[] receive(int size){// throws java.net.SocketTimeoutException{
+	public byte[] receive(int size) throws SocketTimeoutException{
 		byte[] data= new byte[size];
 		DatagramPacket packet= new DatagramPacket(data, data.length);
 		try { r.receive(packet);
-		} catch (IOException e) {	e.printStackTrace(); }
+		} catch(IOException e) {
+			if(e.getClass() == SocketTimeoutException.class) {
+				throw new SocketTimeoutException();
+			}
+		}
 		byte[] datarcv= new byte[packet.getLength()];
 		for(int i=0; i<datarcv.length; i++) datarcv[i]= data[i];
 		return datarcv;

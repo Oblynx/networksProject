@@ -14,10 +14,10 @@ import java.util.*;
 public class CircularArrayList<E>
         extends AbstractList<E> implements RandomAccess {
   
-    private final int n; // buffer length
-    private final List<E> buf; // a List implementing RandomAccess
-    private int head = 0;
-    private int tail = 0;
+    protected final int n; // buffer length
+    protected final List<E> buf; // a List implementing RandomAccess
+    protected int head = 0;
+    protected int tail = 0;
   
     public CircularArrayList(int capacity) {
         n = capacity + 1;

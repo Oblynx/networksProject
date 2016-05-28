@@ -4,15 +4,15 @@ import java.util.*;
 
 public class TeiresiasEchoes {
 	// Parameters
-	private static int localPort=48002, ithakiPort=38002;
-	private static String echoc="E6771", imgc="M0096", soundc="V6170", copterc="Q9878";
+	private static int localPort=48001, ithakiPort=38001;
+	private static String echoc="E1838", imgc="M3039", soundc="V5094", copterc="Q8280";
 	
 	public static void main(String[] args) {
 		prepareLoggingDir();
     //Executes the prescribed measurements
 	  Measurer measurer= new Measurer(s, echoc,imgc,soundc,copterc, echof,echof_nodelay,
 			imgf1,imgf2,tempf,tonef,musicf,copterf1,copterf2);
-		measurer.take_measurements(0,4000,10, 150,180);
+		measurer.take_measurements(0,4*60*1000,30, 160,230);
 		s.close();
 	}
 	private static void prepareLoggingDir(){

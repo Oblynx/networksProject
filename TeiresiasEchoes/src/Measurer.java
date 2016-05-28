@@ -1,4 +1,5 @@
 import java.io.ByteArrayOutputStream;
+import java.net.SocketTimeoutException;
 import java.util.concurrent.*;
 import java.util.Arrays;
 import java.util.Stack;
@@ -17,8 +18,8 @@ public class Measurer {
 	public void take_measurements(int echoDelayMillis, int echototalMeasurementTimeMillis,
 			int toneDuration, int flightlevel1, int flightlevel2){
 		//echoMeasurements(echoDelayMillis, echototalMeasurementTimeMillis);
-		//imgMeasurements();
 		//tempMeasurements();
+		//imgMeasurements();
 		//soundMeasurements(toneDuration);
 		copterMeasurements(flightlevel1, flightlevel2);
 
@@ -39,13 +40,13 @@ public class Measurer {
     			while( curTime < totalMeasurementTimeMillis){
     				long echoTimeMilli= System.nanoTime()/1000000;
     				s.send(code.getBytes());
-    				s.receive(100);
+    				try{ s.receive(100); } catch(SocketTimeoutException e) { break; }
     				echoTimeMilli= System.nanoTime()/1000000-echoTimeMilli;
     				logger.log( (new Long(curTime).toString()+";"+new Long(echoTimeMilli).toString()+"\n").getBytes() );
     				Thread.sleep(delayMillis);
     				curTime= System.currentTimeMillis() - startTime;
     			}
-				} catch (InterruptedException e) {}
+				} catch (InterruptedException e) { e.printStackTrace(); }
 			};
 			
 			// measure delay
@@ -58,10 +59,12 @@ public class Measurer {
 	}
 	// Get 2 images
 	private void imgMeasurements(){
-		ByteArrayOutputStream image1= getImage(imgc), image2= getImage(imgc+"CAM=PTZ");
-		Logger l1= new Logger(imgf1), l2= new Logger(imgf2);
-    l1.log(image1.toByteArray());
-    l2.log(image2.toByteArray());
+		try{
+      ByteArrayOutputStream image1= getImage(imgc), image2= getImage(imgc+"CAM=PTZ");
+      Logger l1= new Logger(imgf1), l2= new Logger(imgf2);
+      l1.log(image1.toByteArray());
+      l2.log(image2.toByteArray());
+		} catch(SocketTimeoutException e) { e.printStackTrace(); }
 	}
 	// output: name;temperature
 	private void tempMeasurements(){
@@ -69,7 +72,7 @@ public class Measurer {
     String echomsg;
     for(int i=0;i<8;i++){
       s.send( (echoc+"T0"+new Integer(i).toString()).getBytes() );
-      echomsg= new String(s.receive(100));
+      try{ echomsg= new String(s.receive(100)); } catch(SocketTimeoutException e) { break; }
       //System.out.println(new Integer(i).toString()+":"+echomsg.substring(27, 46)+"|");
       String name=echomsg.substring(27,30); 
       if (name.startsWith("T")) {
@@ -92,8 +95,8 @@ public class Measurer {
 	}
 	private void copterMeasurements(int fl1, int fl2){
 		CopterController ctrl= new CopterController(s);
-		ctrl.setSessionTimeout(60);
-		ctrl.setControlParams(new float[]{1.50f, 0.00000080f, 0.000009f, 110f});
+		ctrl.setSessionTimeout(70);
+		ctrl.setControlParams(new float[]{0.21f, 0.34f, 0.40f, 150f});
 		// session1
 		ctrl.log(true, copterf1);
 		ctrl.setFlightLevel(fl1);
@@ -104,32 +107,30 @@ public class Measurer {
 		ctrl.start();
 	}
 	
-	private ByteArrayOutputStream getImage(String code){
+	private ByteArrayOutputStream getImage(String code) throws SocketTimeoutException {
 		ByteArrayOutputStream image= new ByteArrayOutputStream();
-		boolean imageEnd= false;
-		s.send(code.getBytes());
+		boolean imageStart= false, imageEnd= false;
 		
-		s.receive(0);
+		s.send(code.getBytes());
+    //init
+		while(!imageStart){
+			byte[] msg= s.receive(1024);
+			int start=0;
+			for (start=0; start<msg.length-1 && !imageStart; start++)
+        if ( msg[start]==(byte)0xFF && msg[start+1]==(byte)0xD8 )
+        	imageStart= true;
+			start--;
+			if(imageStart) image.write(msg, start, msg.length-start);
+		}
+		//get the rest
 		while(!imageEnd){
-			byte[] msg= s.receive(1*1024);
+			byte[] msg= s.receive(1024);
 			int l= msg.length;
 			image.write(msg,0,l);
 			if ( msg[l-2]==(byte)0xFF && msg[l-1]==(byte)0xD9 ) imageEnd= true;
-			//System.out.println(new Byte(msg[l-2]).toString()+new Byte(msg[l-1]).toString());
 		}
 		return image;
 	}
-	/*
-	private ByteArrayOutputStream getSoundclip(String code, int durationSec, boolean adaptiveMode){
-		assert(durationSec<32);
-		int msgSize= (adaptiveMode)? 128+4: 128;
-		ByteArrayOutputStream clip= new ByteArrayOutputStream();
-		s.send((code+String.format("%03d", durationSec*32)).getBytes());
-		for(int i=0; i<durationSec*32; i++)
-			clip.write(s.receive(msgSize), 0, msgSize);
-		return clip;
-	}
-	*/
 	
 	
 	private String echoc, imgc, soundc, copterc;
