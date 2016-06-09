@@ -16,6 +16,7 @@ public class CopterController {
 	}
 	public void start(){
 		assert(timeoutSec < 200);
+		if (logEnabled) logger.log((flightlevel+"\n").getBytes());
 		long startTime= System.currentTimeMillis();
 		s.initAutopilot();
 		pid.startClock();
@@ -30,7 +31,7 @@ public class CopterController {
 		}
 	}
 	
-	private PIDController pid= new PIDController(70,0, 100,190);
+	private PIDController pid= new PIDController(70,0, 100,200);
 	private int timeoutSec= 0, flightlevel= 0;
 	private boolean logEnabled= true;
 	private Logger logger;

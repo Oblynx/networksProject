@@ -16,12 +16,11 @@ public class Measurer {
 	}
 	
 	public void take_measurements(int echoDelayMillis, int echototalMeasurementTimeMillis,
-			int toneDuration, int flightlevel1, int flightlevel2){
+			int toneDuration){
 		echoMeasurements(echoDelayMillis, echototalMeasurementTimeMillis);
 		tempMeasurements();
 		imgMeasurements();
 		soundMeasurements(toneDuration);
-		copterMeasurements(flightlevel1, flightlevel2);
 
 		// Wait for any running tasks to finish
 		while(!tasks.empty()) try{
@@ -29,33 +28,32 @@ public class Measurer {
 		} catch(Exception e) { System.err.println(e.getMessage()); }
 		pool.shutdown();
 	}
+	public void take_copter_measurements(int flightlevel1, int flightlevel2, int timeSec, String logdir){
+		copterMeasurements(flightlevel1, flightlevel2, timeSec, logdir);
+	}
 
 	// output: timestamp<milli>;echodelay<milli>
 	private void echoMeasurements(int delayMillis, int totalMeasurementTimeMillis){
-		Callable<Void> task= () -> {
-			Logger logger_delay= new Logger(echof), logger_nodelay= new Logger(echof_nodelay); 
-			java.util.function.BiConsumer<Logger, String> measureAction= (logger, code) -> {
-				try{
-    			long startTime= System.currentTimeMillis(), curTime= 0;
-    			while( curTime < totalMeasurementTimeMillis){
-    				long echoTimeMilli= System.nanoTime()/1000000;
-    				s.send(code.getBytes());
-    				try{ s.receive(100); } catch(SocketTimeoutException e) { break; }
-    				echoTimeMilli= System.nanoTime()/1000000-echoTimeMilli;
-    				logger.log( (new Long(curTime).toString()+";"+new Long(echoTimeMilli).toString()+"\n").getBytes() );
-    				Thread.sleep(delayMillis);
-    				curTime= System.currentTimeMillis() - startTime;
-    			}
-				} catch (InterruptedException e) { e.printStackTrace(); }
-			};
-			
-			// measure delay
-			measureAction.accept(logger_delay, echoc);
-			// measure no delay
-			measureAction.accept(logger_nodelay, "E0000");
-			return null;
-		};
-		tasks.push(pool.submit(task));
+    Logger logger_delay= new Logger(echof), logger_nodelay= new Logger(echof_nodelay); 
+    java.util.function.BiConsumer<Logger, String> measureAction= (logger, code) -> {
+      try{
+        long startTime= System.currentTimeMillis(), curTime= 0;
+        while( curTime < totalMeasurementTimeMillis){
+          long echoTimeMilli= System.nanoTime()/1000000;
+          s.send(code.getBytes());
+          try{ s.receive(100); } catch(SocketTimeoutException e) { break; }
+          echoTimeMilli= System.nanoTime()/1000000-echoTimeMilli;
+          logger.log( (new Long(curTime).toString()+";"+new Long(echoTimeMilli).toString()+"\n").getBytes() );
+          Thread.sleep(delayMillis);
+          curTime= System.currentTimeMillis() - startTime;
+        }
+      } catch (InterruptedException e) { e.printStackTrace(); }
+    };
+    
+    // measure delay
+    measureAction.accept(logger_delay, echoc);
+    // measure no delay
+    measureAction.accept(logger_nodelay, "E0000");
 	}
 	// Get 2 images
 	private void imgMeasurements(){
@@ -97,9 +95,9 @@ public class Measurer {
 		streamer.waitToFinish();
 		streamer.close();
 	}
-	private void copterMeasurements(int fl1, int fl2){
+	private void copterMeasurements(int fl1, int fl2, int timeSec, String logdir){
 		CopterController ctrl= new CopterController(s);
-		ctrl.setSessionTimeout(50);
+		ctrl.setSessionTimeout(timeSec);
 		ctrl.setControlGains(new float[]{0.21f, 0.032f, 0.025f, 150f}, false);
 		// session1
 		ctrl.log(true, copterf1);
@@ -109,6 +107,13 @@ public class Measurer {
 		ctrl.log(true,copterf2);
 		ctrl.setFlightLevel(fl2);
 		ctrl.start();
+		
+		// Copy error dataset to current logging directory
+    String[] command = {"cp", "logs/copter_error_dataset", logdir+"copter_error_dataset"};
+		ProcessBuilder pb = new ProcessBuilder(command);	
+	  try {
+      pb.start();
+		} catch (java.io.IOException e) { e.printStackTrace(); }
 	}
 	
 	private ByteArrayOutputStream getImage(String code) throws SocketTimeoutException {

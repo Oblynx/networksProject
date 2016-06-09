@@ -81,7 +81,7 @@ public class AudioStreamer {
           while(elasticMemory.isEmpty()){
           	line.stop();
           	if (elasticMemory.isEmpty() && streamTimeout) break;
-            if (timesTimeout++ > streamingTimeout) throw new TimeoutException("Streaming stalled!"); 
+            if (timesTimeout++ > streamingTimeout) throw new TimeoutException("Streaming stalled! Too many timeouts."); 
             System.err.println("[playback]: Buffer empty");
             Thread.sleep(timesTimeout*1000);
             line.start();
@@ -158,7 +158,7 @@ public class AudioStreamer {
 	private IthakiSocket s;
 	private Logger toneDiffLogger, toneSampLogger, musicDiffLogger, musicSampLogger;
 	
-	private int packetLength= 128, packetOverhead= 4, packetsPerSec= 32, streamingTimeout= 5;
+	private int packetLength= 128, packetOverhead= 4, packetsPerSec= 32, streamingTimeout= 8;
 
 	private static byte beta_def= 1;
 }
