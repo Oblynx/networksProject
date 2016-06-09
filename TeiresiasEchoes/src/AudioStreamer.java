@@ -45,6 +45,14 @@ public class AudioStreamer {
           byte[] msg= s.receive(msgSize);
           if (logEnable) log(logSource, "diff", msg);
           short[] decodedMsg= (adaptiveMode)? decodeAdaptive(msg): decode(msg,(short)0,beta_def);
+          if (logEnable){
+          	byte[] decMsgBytes= new byte[2*decodedMsg.length];
+          	for(int j=0; j<decodedMsg.length; j++){
+          		decMsgBytes[2*j]= (byte) (decodedMsg[j] & 0x00FF); 
+              decMsgBytes[2*j+1]= (byte) ((decodedMsg[j] & 0xFF00) >> 8);
+          	}
+          	log(logSource, "samp", decMsgBytes);
+      		}
           elasticMemory.add(decodedMsg);
       	} catch(java.net.SocketTimeoutException e){
       		streamTimeout= true;
@@ -108,9 +116,13 @@ public class AudioStreamer {
 		return decodedMsg;
 	}
 	private static short[] decodeAdaptive(byte[] msg){
-		short mu=   (short) (msg[1]<<8 | (msg[0] & 0xFF));
-		short beta= (short) (msg[3]<<8 | (msg[2] & 0xFF));
-		return decode(ByteBuffer.wrap(msg, 4, msg.length-4).slice().array(), mu, beta);
+		short mu=   (short) (msg[1] <<8 | (msg[0] & 0x00FF));
+		short beta= (short) (msg[3] <<8 | (msg[2] & 0x00FF));
+		StringBuffer head= new StringBuffer();
+		for(int i=0; i<4; i++) { head.append(msg[i]); head.append(" "); }
+		byte[] msg_raw= new byte[msg.length-4];
+		for(int i=0; i<msg.length-4; i++) msg_raw[i]= msg[i+4];
+		return decode(msg_raw, mu, beta);
 	}
 	// Disambiguates between loggers and then logs msg. Example: log("music","diff",msg)
 	private void log(String source, String mode, byte[] msg){
@@ -118,7 +130,7 @@ public class AudioStreamer {
 		if (source.equals("tone")) pickLogger|= 1;
 		else if (source.equals("music")) pickLogger|= 2;
 		if (mode.equals("diff")) pickLogger|= 4;
-		else if (source.equals("samp")) pickLogger|= 8;
+		else if (mode.equals("samp")) pickLogger|= 8;
 		Logger logger;
 		switch (pickLogger){
 		case 1|4:

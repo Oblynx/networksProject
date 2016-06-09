@@ -1,18 +1,28 @@
 import java.text.*;
 import java.io.File;
+import java.net.SocketTimeoutException;
 import java.util.*;
 
 public class TeiresiasEchoes {
 	// Parameters
-	private static int localPort=48001, ithakiPort=38001;
-	private static String echoc="E1838", imgc="M3039", soundc="V5094", copterc="Q8280";
+	private static int localPort=48024, ithakiPort=38024;
+	private static String echoc="E0710", imgc="M7595", soundc="V8431", copterc="Q9843";
 	
 	public static void main(String[] args) {
+		/*
+		s.send("E0000".getBytes());
+		try {
+			System.out.println(new String(s.receive(1000)));
+		} catch (SocketTimeoutException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		*/
 		prepareLoggingDir();
     //Executes the prescribed measurements
 	  Measurer measurer= new Measurer(s, echoc,imgc,soundc,copterc, echof,echof_nodelay,
 			imgf1,imgf2,tempf,tonef,musicf,copterf1,copterf2);
-		measurer.take_measurements(0,4*60*1000,30, 160,230);
+		measurer.take_measurements(0,4*1000,30, 160,230);
 		s.close();
 	}
 	private static void prepareLoggingDir(){

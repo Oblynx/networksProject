@@ -20,8 +20,8 @@ public class Measurer {
 		//echoMeasurements(echoDelayMillis, echototalMeasurementTimeMillis);
 		//tempMeasurements();
 		//imgMeasurements();
-		//soundMeasurements(toneDuration);
-		copterMeasurements(flightlevel1, flightlevel2);
+		soundMeasurements(toneDuration);
+		//copterMeasurements(flightlevel1, flightlevel2);
 
 		// Wait for any running tasks to finish
 		while(!tasks.empty()) try{
@@ -71,9 +71,13 @@ public class Measurer {
 		Logger logger= new Logger(tempf);
     String echomsg;
     for(int i=0;i<8;i++){
-      s.send( (echoc+"T0"+new Integer(i).toString()).getBytes() );
-      try{ echomsg= new String(s.receive(100)); } catch(SocketTimeoutException e) { break; }
-      //System.out.println(new Integer(i).toString()+":"+echomsg.substring(27, 46)+"|");
+    	String code= echoc+"T0"+Integer.toString(i);
+      s.send( code.getBytes() );
+      try{ echomsg= new String(s.receive(100)); } catch(SocketTimeoutException e) {
+      	e.printStackTrace();
+      	break;
+      }
+      System.out.println(Integer.toString(i)+":"+code+" -> "+echomsg/*.substring(27, 46)*/);
       String name=echomsg.substring(27,30); 
       if (name.startsWith("T")) {
         String temp=echomsg.substring(43,46);
@@ -85,11 +89,11 @@ public class Measurer {
 		streamer= new AudioStreamer(pool, s, tonef, musicf);
 		boolean adaptive= false;
 		// stream tone
-		streamer.stream(soundc+"T", durationSec, (adaptive)? 16: 8, adaptive, true, "tone");
-		streamer.waitToFinish();
+		/*streamer.stream(soundc+"T", durationSec, (adaptive)? 16: 8, adaptive, true, "tone");
+		streamer.waitToFinish();*/
 		// stream music
 		adaptive= true;
-		streamer.stream(soundc+"F", durationSec, (adaptive)? 16: 8, adaptive, true, "music");
+		streamer.stream(soundc+"AQF", durationSec, (adaptive)? 16: 8, adaptive, true, "music");
 		streamer.waitToFinish();
 		streamer.close();
 	}
