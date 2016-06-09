@@ -17,11 +17,11 @@ public class Measurer {
 	
 	public void take_measurements(int echoDelayMillis, int echototalMeasurementTimeMillis,
 			int toneDuration, int flightlevel1, int flightlevel2){
-		//echoMeasurements(echoDelayMillis, echototalMeasurementTimeMillis);
-		//tempMeasurements();
-		//imgMeasurements();
+		echoMeasurements(echoDelayMillis, echototalMeasurementTimeMillis);
+		tempMeasurements();
+		imgMeasurements();
 		soundMeasurements(toneDuration);
-		//copterMeasurements(flightlevel1, flightlevel2);
+		copterMeasurements(flightlevel1, flightlevel2);
 
 		// Wait for any running tasks to finish
 		while(!tasks.empty()) try{
@@ -89,8 +89,8 @@ public class Measurer {
 		streamer= new AudioStreamer(pool, s, tonef, musicf);
 		boolean adaptive= false;
 		// stream tone
-		/*streamer.stream(soundc+"T", durationSec, (adaptive)? 16: 8, adaptive, true, "tone");
-		streamer.waitToFinish();*/
+		streamer.stream(soundc+"T", durationSec, (adaptive)? 16: 8, adaptive, true, "tone");
+		streamer.waitToFinish();
 		// stream music
 		adaptive= true;
 		streamer.stream(soundc+"AQF", durationSec, (adaptive)? 16: 8, adaptive, true, "music");
@@ -99,8 +99,8 @@ public class Measurer {
 	}
 	private void copterMeasurements(int fl1, int fl2){
 		CopterController ctrl= new CopterController(s);
-		ctrl.setSessionTimeout(70);
-		ctrl.setControlParams(new float[]{0.21f, 0.34f, 0.40f, 150f});
+		ctrl.setSessionTimeout(50);
+		ctrl.setControlGains(new float[]{0.21f, 0.032f, 0.025f, 150f}, false);
 		// session1
 		ctrl.log(true, copterf1);
 		ctrl.setFlightLevel(fl1);

@@ -5,8 +5,8 @@ import java.util.*;
 
 public class TeiresiasEchoes {
 	// Parameters
-	private static int localPort=48024, ithakiPort=38024;
-	private static String echoc="E0710", imgc="M7595", soundc="V8431", copterc="Q9843";
+	private static int localPort=48021, ithakiPort=38021;
+	private static String echoc="E7956", imgc="M3546", soundc="V2065", copterc="Q5411";
 	
 	public static void main(String[] args) {
 		/*
@@ -22,7 +22,7 @@ public class TeiresiasEchoes {
     //Executes the prescribed measurements
 	  Measurer measurer= new Measurer(s, echoc,imgc,soundc,copterc, echof,echof_nodelay,
 			imgf1,imgf2,tempf,tonef,musicf,copterf1,copterf2);
-		measurer.take_measurements(0,4*1000,30, 160,230);
+		measurer.take_measurements(0,4*1000,10, 160,230);
 		s.close();
 	}
 	private static void prepareLoggingDir(){

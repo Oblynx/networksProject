@@ -55,6 +55,7 @@ public class AudioStreamer {
       		}
           elasticMemory.add(decodedMsg);
       	} catch(java.net.SocketTimeoutException e){
+      		// Signals the playback thread not to expect all the packages
       		streamTimeout= true;
       		System.out.println("[streamer]: Streaming timed out");
       		break;
@@ -72,15 +73,17 @@ public class AudioStreamer {
         line.open(audioFormat, 5*packetsPerSec*packetLength*Q/8);
         line.start();
         // Wait to buffer memory before starting playback
-        int delayPlayback= durationSec/3;
-        Thread.sleep(delayPlayback*1000);
+        float delayPlayback= durationSec/8f;
+        Thread.sleep(Math.round(delayPlayback*1000));
+        int timesTimeout= 0;
+        System.out.println(">>> Playback begin! <<<");
         for (int i=0; i<durationSec*packetsPerSec; i++){
           while(elasticMemory.isEmpty()){
           	line.stop();
           	if (elasticMemory.isEmpty() && streamTimeout) break;
-            if (streamingTimeout-- < 0) throw new TimeoutException("Streaming stalled!"); 
+            if (timesTimeout++ > streamingTimeout) throw new TimeoutException("Streaming stalled!"); 
             System.err.println("[playback]: Buffer empty");
-            Thread.sleep(1000);
+            Thread.sleep(timesTimeout*1000);
             line.start();
           }
           if (elasticMemory.isEmpty() && streamTimeout) break;
@@ -92,6 +95,7 @@ public class AudioStreamer {
         System.out.println(">>> Playback complete! <<<");
         line.close();
       } catch(LineUnavailableException e) { System.err.println(e.getMessage()); }
+      streamTimeout= false;
 			return null;
 		};
 		

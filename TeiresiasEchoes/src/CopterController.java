@@ -6,13 +6,13 @@ public class CopterController {
 	}
 	public void setSessionTimeout(int timeoutSec) { this.timeoutSec= timeoutSec; }
 	public void setFlightLevel(int fl) { this.flightlevel= fl; pid.setpoint= fl; }
-	public void setControlParams(float[] params){
-		// Schedule gains to implement nonlinear control
-		float[] decisionPoints= {0,60,100}, paramScales= {1/2f,1/1.5f,1f, 1f,1/2f,1/3f};
-
-		pid.params= params;
-		pid.decisionPoints= decisionPoints.clone();
-		pid.paramScales= paramScales.clone();
+	public void setControlGains(float[] gains, boolean gainScheduling){
+		pid.gains= gains;
+		if (gainScheduling){
+      // Schedule gains to implement nonlinear control
+      float[] decisionPoints= {-100,-60,-15,65,90}, paramScales= {0.65f,0.8f,0.9f, 1f,0.65f,0.45f};
+      pid.createGainSchedule(decisionPoints, paramScales, 3, 0);
+		}
 	}
 	public void start(){
 		assert(timeoutSec < 200);
@@ -30,7 +30,7 @@ public class CopterController {
 		}
 	}
 	
-	private PIDController pid= new PIDController(30,70, 100,190);
+	private PIDController pid= new PIDController(70,0, 100,190);
 	private int timeoutSec= 0, flightlevel= 0;
 	private boolean logEnabled= true;
 	private Logger logger;
