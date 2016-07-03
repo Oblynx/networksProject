@@ -119,6 +119,8 @@ public class IthakiSocket {
 			assert(v.length == 5);
 			lmotor= v[0]; rmotor= v[1]; altit= v[2]; temper= v[3]; pressure= v[4];
 		}*/
+		/** Log format: "lmotor rmotor alt temp press\n"
+		 */
 		public byte[] bytes(){
 			return (new String(Integer.toString(lmotor)+" "+ Integer.toString(rmotor)+" "+
 							Integer.toString(altit)+" "+ Float.toString(temper)+" "+ Float.toString(pressure)+"\n")

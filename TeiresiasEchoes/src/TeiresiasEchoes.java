@@ -5,16 +5,16 @@ import java.util.*;
 
 public class TeiresiasEchoes {
 	// Parameters
-	private static int localPort=48021, ithakiPort=38021;
-	private static String echoc="E7956", imgc="M3546", soundc="V2065", copterc="Q5411";
+	private static int localPort=48010, ithakiPort=38010;
+	private static String echoc="E1860", imgc="M8057", soundc="V1588", copterc="Q5015";
 	
 	public static void main(String[] args) {
 		prepareLoggingDir();
     //Executes the prescribed measurements
 	  Measurer measurer= new Measurer(s, echoc,imgc,soundc,copterc, echof,echof_nodelay,
 			imgf1,imgf2,tempf,tonef,musicf,copterf1,copterf2);
-		measurer.take_copter_measurements(160,230, 80, logdir);
-		measurer.take_measurements(0,4*60*1000,30);
+		measurer.take_copter_measurements(160,230, 40, logdir);
+//		measurer.take_measurements(0,4*60*1000,30);
 		s.close();
 	}
 	private static void prepareLoggingDir(){
@@ -32,6 +32,5 @@ public class TeiresiasEchoes {
 					imgf1="img1"+imgc+".jpg", imgf2="img2"+imgc+".jpg", tempf="temp"+echoc+".log",
 					tonef="tone"+soundc+".log", musicf="music"+soundc+".log",
 					copterf1="copter_fl1"+copterc+".log",	copterf2="copter_fl2"+copterc+".log", logdir;
-	private static IthakiSocket s= new IthakiSocket(localPort, ithakiPort, 3000);
-	
+	private static IthakiSocket s= new IthakiSocket(localPort, ithakiPort, 5000);
 }

@@ -2,6 +2,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class PIDController {
+	float errStdScaleoff= 10;
+	
 	public PIDController(int filtOrder, int initErr, int min_control, int max_control){
 		this.filtOrder= filtOrder;
 		this.max_control= max_control; this.min_control= min_control;
@@ -35,10 +37,14 @@ public class PIDController {
 		plotUpdater.log( (currentTimeSec+" "+(setpoint-y)+"\n").getBytes() );
 
 	  // Calc responses
-		float errVar= (filtOrder*err2Sum - errSum*errSum)/(filtOrder*(filtOrder-1));
+		// Cutoff integral response for high error variance (gaussian cutoff)
+		float errStd= (float) Math.sqrt(filtOrder*err2Sum - errSum*errSum)/(filtOrder*(filtOrder-1)),
+					varScale= (errStd < errStdScaleoff)? 1:
+											(float) Math.exp(-(errStd-errStdScaleoff)*(errStd-errStdScaleoff) /
+																				(0.8*errStdScaleoff) /(0.8*errStdScaleoff));
 		float up=0,ui=0,ud=0; 
 		up= errBuf.get(bufend);
-		ui= (float) (errSum/(0.002*errVar+1));
+		ui= errSum*varScale;
 		ud= (bufend>0)? (errBuf.get(bufend) - errBuf.get(bufend-1)): 0;
 		
 		// Calc mean error to select appropriate gain model from the schedule

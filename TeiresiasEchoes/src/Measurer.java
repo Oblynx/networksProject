@@ -5,7 +5,8 @@ import java.util.Arrays;
 import java.util.Stack;
 
 public class Measurer {
-
+	private float[] copterControlParams= new float[]{0.20f, 0.022f, 0.020f, 150f};
+	
 	public Measurer(IthakiSocket s, String echoc, String imgc, String soundc, String copterc, String echof,
 			String echof_nodelay, String imgf1, String imgf2, String tempf, String tonef, String musicf,
 			String copterf1, String copterf2){
@@ -98,7 +99,7 @@ public class Measurer {
 	private void copterMeasurements(int fl1, int fl2, int timeSec, String logdir){
 		CopterController ctrl= new CopterController(s);
 		ctrl.setSessionTimeout(timeSec);
-		ctrl.setControlGains(new float[]{0.21f, 0.032f, 0.025f, 150f}, false);
+		ctrl.setControlGains(copterControlParams, false);
 		// session1
 		ctrl.log(true, copterf1);
 		ctrl.setFlightLevel(fl1);
