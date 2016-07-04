@@ -1,4 +1,7 @@
 
+/**
+ * @class Controls the copter using the PIDcontroller; sets parameters and communicates results
+ */
 public class CopterController {
 	public CopterController(IthakiSocket s) { this.s= s; }
 	public void log(boolean enable, String fname){

@@ -7,7 +7,9 @@ import java.lang.IllegalStateException;
 import java.lang.IllegalArgumentException;
 import javax.sound.sampled.*;
 
-// Streams audio. Uses external executor 
+/** 
+ * @class Streams and plays audio concurrently. Uses external executor 
+ */
 public class AudioStreamer {
 	public AudioStreamer(ExecutorService pool, IthakiSocket s, String tonef, String musicf){
 		this.pool= pool; this.s= s;

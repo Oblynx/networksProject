@@ -21,9 +21,11 @@ array<int16_t, 2*MSG_L> decode(int8_t* msg, int16_t mu, int16_t beta){
   return decodedMsg;
 }
 
-int main(){
-  FILE* f= fopen("permLogs/10-06 02:18:59/musicV2065.log_diff", "r");
-  FILE* fout= fopen("permLogs/10-06 02:18:59/musicV2065.log_samp", "w");
+int main(int argc, char** argv){
+  if(argc < 2) { std::cerr << "Supply file name\n"; return 1; }
+  string fname(argv[1]);
+  FILE* f= fopen(fname.c_str(), "r");
+  FILE* fout= fopen((fname+"_samp").c_str(), "w");
   if(!f) {cerr << "Error opening fin!\n"; return 1; }
   if(!fout) {cerr << "Error opening fout!\n"; return 1; }
   int8_t msg[MSG_L];

@@ -1,6 +1,10 @@
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * @class Provides PID, gain scheduling and variance-detecting control; logs results to file and visualizes
+ *  them with GNUPlot
+ */
 public class PIDController {
 	float errStdScaleoff= 10;
 	

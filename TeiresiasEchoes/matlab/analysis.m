@@ -1,8 +1,8 @@
 %% Net analysis
 clear; close all;
-dir= '27-05 17:45:03'; dir= '10-06 02:18:59';
+dir= '10-06 02:43:14'; dir= '27-05 17:45:03'; dir= '10-06 02:18:59';
 mkdir(['results/',dir]);
-%
+%{
 %% Echo: G1-8
 load(['../permLogs/',dir,'/echoE7956.log']);
 echodel= echoE7956(:,2); echot= echoE7956(:,1)/1000;
@@ -11,11 +11,12 @@ for opI= 1:2:3
   figure(opI);
   plot(echot,echodel); title(sprintf('G%d: Echo delays in time (E7956)',opI)); grid on;
   xlabel('t (s)'); ylabel('delay (ms)');
+  saveas(gcf, ['results/',dir,sprintf('/G%d.pdf', opI)]);
   figure(opI+4);
   histogram(echodel); title(sprintf('G%d: Echo delay histogram (E7956)',opI+4)); xlabel('delay (ms)');
-  saveas(gcf, ['results/',dir,sprintf('/G%d.pdf', opI)]);
+  saveas(gcf, ['results/',dir,sprintf('/G%d.pdf', opI+4)]);
   
-  fprintf('Echo delay: mean=%g var=%g\n', mean(echodel), var(echodel));
+  fprintf('Echo delay: mean=%gms var=%gms^2\n', mean(echodel), var(echodel));
 
   % Sliding window throughput: transform the arrival timestamps vector echot into a steady
   % clock with the packet arrival times indicated.
@@ -53,8 +54,8 @@ for opI= 1:2:3
   echodel= echoE7956_nodelay(:,2); echot= echoE7956_nodelay(:,1)/1000;
   clear('packetArrivals','throughput');
 end
-clear;
 %}
+clear('echo*','tw*','l*');
 %% Audio: G9-10
 
 fs= 8000;
@@ -84,7 +85,7 @@ subplot(212);
 spectrogram(music,blackman(800),490,512,fs,'yaxis');
 title('G10: Music spectrogram');
 saveas(gcf, ['results/',dir,'/G10.pdf']);
-
+%}
 %% G11-G14
 tonedifff= fopen(['../permLogs/',dir,'/toneV2065.log_diff_split']);
 tonediff= fread(tonedifff,'int8');
@@ -113,9 +114,8 @@ beta= fread(musicbetaf, 'int16');
 figure(16);
 plot(paramt,beta); title('G16: Quantizer step (V2065)'); xlabel('t (s)');
 saveas(gcf, ['results/',dir,'/G16.pdf']);
-
+%{
 clear('tone*','music*','mu','beta','fs'); close all;
-%}
 %% Copter: G19-20
 copterf= fopen(['../permLogs/',dir,'/copter_fl1Q5411.log']);
 fl= str2double(fgetl(copterf));
@@ -144,3 +144,4 @@ semilogy([coptalt, copttemp, coptpres]);
 title(sprintf('G20: Copter measurements (flight level: %d)', fl)); xlabel('t');
 legend('altitude', 'temperature', 'pressure'); grid minor;
 saveas(gcf, ['results/',dir,'/G19.pdf']);
+%}

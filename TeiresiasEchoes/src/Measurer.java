@@ -4,6 +4,9 @@ import java.util.concurrent.*;
 import java.util.Arrays;
 import java.util.Stack;
 
+/**
+ * @class Makes all the measurements.
+ */
 public class Measurer {
 	private float[] copterControlParams= new float[]{0.20f, 0.022f, 0.020f, 150f};
 	
@@ -42,7 +45,10 @@ public class Measurer {
         while( curTime < totalMeasurementTimeMillis){
           long echoTimeMilli= System.nanoTime()/1000000;
           s.send(code.getBytes());
-          try{ s.receive(100); } catch(SocketTimeoutException e) { break; }
+          try{ s.receive(100); } catch(SocketTimeoutException e) {
+          	e.printStackTrace();
+          	break;
+          }
           echoTimeMilli= System.nanoTime()/1000000-echoTimeMilli;
           logger.log( (new Long(curTime).toString()+";"+new Long(echoTimeMilli).toString()+"\n").getBytes() );
           Thread.sleep(delayMillis);

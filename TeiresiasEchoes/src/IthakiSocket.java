@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * @class Provides a high-level communication channel with the Ithaki server
+ */
 public class IthakiSocket {
 	public IthakiSocket(int localPort, int ithakiPort, int timeout){
 		this.localPort= localPort; this.ithakiPort= ithakiPort;

@@ -3,18 +3,21 @@ import java.io.File;
 import java.net.SocketTimeoutException;
 import java.util.*;
 
+/**
+ * @class Main class, holds parameters and starts the experiment
+ */
 public class TeiresiasEchoes {
 	// Parameters
-	private static int localPort=48010, ithakiPort=38010;
-	private static String echoc="E1860", imgc="M8057", soundc="V1588", copterc="Q5015";
+	private static int localPort=48013, ithakiPort=38013;
+	private static String echoc="E2529", imgc="M4599", soundc="V6390", copterc="Q5837";
 	
 	public static void main(String[] args) {
 		prepareLoggingDir();
     //Executes the prescribed measurements
 	  Measurer measurer= new Measurer(s, echoc,imgc,soundc,copterc, echof,echof_nodelay,
 			imgf1,imgf2,tempf,tonef,musicf,copterf1,copterf2);
-		measurer.take_copter_measurements(160,230, 40, logdir);
-//		measurer.take_measurements(0,4*60*1000,30);
+		//measurer.take_copter_measurements(160,230, 40, logdir);
+		measurer.take_measurements(0,4*60*1000,30);
 		s.close();
 	}
 	private static void prepareLoggingDir(){
