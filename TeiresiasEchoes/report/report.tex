@@ -1,0 +1,94 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english,greek]{babel}
+\usepackage{graphicx}
+\graphicspath{
+	{"/home/oblivion/Documents/Thmmy/examino8/net2/project/networksProject/TeiresiasEchoes/matlab/results/10-06 02:18:59/"}
+	{"/home/oblivion/Documents/Thmmy/examino8/net2/project/networksProject/TeiresiasEchoes/permLogs/10-06 02:18:59/"}
+}
+\usepackage{geometry}
+\geometry{a4paper, margin=2.5cm}
+\usepackage{booktabs}
+\setlength{\heavyrulewidth}{1.5pt}
+\setlength{\abovetopsep}{4pt}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Δίκτυα Υπολογιστών 2}
+\rhead{Κωνσταντίνος Σαμαράς-Τσακίρης, 7972}
+\cfoot{\thepage}
+
+\usepackage{siunitx}
+\sisetup{output-exponent-marker=\ensuremath{\mathrm{E}}}
+
+\title{Δίκτυα 2: Αναφορά}
+\author{Κωνσταντίνος Σαμαράς-Τσακίρης}
+
+\begin{document}
+\maketitle
+
+\section{Δομή Κώδικα}
+Ο κώδικας που συνοδεύει την εργασία είναι δομημένος σε πολλές κλάσεις που περιγράφονται συνοπτικά.
+
+\vspace{0.5cm}
+\begin{tabular}{|l|p{11cm}|}
+	\hline
+	\multicolumn{2}{c}{Λειτουργικές}\\
+	\hline
+	\foreignlanguage{english}{TeiresiasEchoes} & Η βασική κλάση, που φέρει τις παραμέτρους του πειράματος και εκκινεί τη διαδικασία.\\
+	\foreignlanguage{english}{Measurer} & Παίρνει όλες τις μετρήσεις που χρειάζονται.\\
+	\foreignlanguage{english}{AudioStreamer} & Ταυτόχρονα λαμβάνει πακέτα ήχου και τα παίζει.\\
+	\foreignlanguage{english}{CopterController} & Ελέγχει το \foreignlanguage{english}{IthakiCopter} καλώντας τον \foreignlanguage{english}{PIDcontroller} και θέτει τις παραμέτρους ελέγχου.\\
+	\foreignlanguage{english}{PIDcontroller} & Παρέχει επαυξημένο \foreignlanguage{english}{PID} έλεγχο με \foreignlanguage{english}{gain scheduling}, χωρίς να σχετίζεται άμεσα με το \foreignlanguage{english}{IthakiCopter}.\\
+	\hline
+\end{tabular}
+
+\vspace{0.5cm}
+\begin{tabular}{|l|p{11cm}|}
+	\hline
+	\multicolumn{2}{c}{Βοηθητικές}\\
+	\hline
+	\foreignlanguage{english}{IthakiSocket} & Παρέχει κανάλι επικοινωνίας με την Ιθάκη.\\
+	\foreignlanguage{english}{Logger} & Παρέχει υπηρεσίες καταγραφής μηνυμάτων σε αρχεία.\\
+	\foreignlanguage{english}{CircularArrayList} & Δομή δεδομένων που χρησιμοποιείται από τον \foreignlanguage{english}{PIDController}.\\
+	\hline
+\end{tabular}
+
+\section{Παρατηρήσεις}
+\subsection{\foreignlanguage{english}{Echo}}
+Στο πείραμα \foreignlanguage{english}{ping} μετράται η καθυστέρηση παραλαβής του πακέτου και από αυτό υπολογίζεται η ρυθμαπόδοση ως το πλήθος των πακέτων που καταφθάνουν σε δοσμένο χρονικό διάστημα διά το χρόνο αυτό.
+
+Η κατανομή των καθυστερήσεων φαίνεται διαφορετική στα 2 πειράματα που παρουσιάζονται. Στο 1ο μοιάζει με εκθετική, ενώ στο 2ο ομοιόμορφη. Ταυτόχρονα με τη διεξαγωγή των πειραμάτων το δίκτυο είχε φορτίο άλλης προέλευσης το οποίο μπορεί να συνεισέφερε στις κατά πολύ μεγαλύτερες καθυστερήσεις που παρουσιάζονται στην 1η συνεδρία. Αυτό το συμπέρασμα ενισχύεται από τη σύγκριση των διαγραμμάτων \foreignlanguage{english}{G5, G7} της συνεδρίας 2, με το πρώτο να έχει ενεργή την καθυστέρηση της Ιθάκης και το δεύτερο ανενεργή. Εκεί φαίνεται πως το τυπικό φορτίο του δικτύου προκαλεί καθυστερήσεις με εκθετική κατανομή, ενώ οι καθυστερήσεις της Ιθάκης είναι ομοιόμορφα κατανεμημένες. Η πιθανότερη υπόθεση που δικαιολογεί τις παρατηρήσεις είναι: Η κατανομή της Ιθάκης είναι ομοιόμορφη και τα αποτελέσματα της πρώτης συνεδρίας εξηγούνται από μεγάλο φορτίο του δικτύου.
+
+\begin{table}
+	\centering
+	\begin{tabular}{c|cc}
+	  \multicolumn{3}{c}{Συνεδρία 1}\\
+		Με καθυστέρηση & Χωρίς καθυστέρηση\\
+		\hline
+		Μέσος όρος & \num{1098}$ms$ & \num{6.98} $ms$\\
+		Διασπορά & \num{5.97e+6}$ms^2$ & \num{4800} $ms^2$\\
+		\\
+		\multicolumn{3}{c}{Συνεδρία 2}\\
+		\hline
+		Μέσος όρος & \num{1082} $ms$ & \num{55} $ms$\\
+		Διασπορά & \num{159E3} $ms^2$ & \num{107} $ms^2$
+	\end{tabular}
+
+	\caption{Μέσος όρος και διασπορά καθυστερήσεων}
+\end{table}
+
+\subsection{\foreignlanguage{english}{Audio Streaming}}
+Τα αποτελέσματα της 1ης συνεδρίας είναι παράξενα: η μουσική είναι λευκός θόρυβος, ενώ ο τόνος έχει στιγμές έντασης και περιόδους σιγής. Ενδεχομένως κατά τη διάρκεια αυτής της συνεδρίας να υπήρχε αρκετά μεγάλος φόρτος στο δίκτυο, ώστε να χάνονται πακέτα κατά τη μεταβίβαση. Επειδή το κανάλι του ήχου χρησιμοποιεί πρωτόκολλο \foreignlanguage{english}{UDP} δε ζητείται επανάληψη του μηνύματος σε περίπτωση που αυτό μεταδοθεί εσφαλμένα, ούτε αν ο αποδέκτης δεν το λάβει ποτέ. Επειδή το δίκτυο λειτουργεί με τη λογική \foreignlanguage{english}{"best effort"}, αυτό το αποτέλεσμα δεν είναι αδικαιολόγητο. Είναι σημειωτέο ότι στην ίδια συνεδρία ούτε οι εικόνες της κάμερας έφθασαν χωρίς μεγάλα σφάλματα.
+
+Η 2η συνεδρία όμως είναι επιτυχής. Ο τόνος έχει 2 σημαντικές συχνότητες, 235 και 381$Hz$, ενώ ακούγεται το τραγούδι "Φεγγάρι μάγια μου'κανες" (σε εκτέλεση Μπιθικώτση;).
+Η κατανομή των διαφορών είναι κανονική και τα δείγματα προκύπτουν από τις διαφορές ως εξής:
+$$s= (d-m)*b \rightarrow s= k+l*e^(-x^2) \rightarrow $$
+
+
+\subsection{\foreignlanguage{english}{IthakiCopter}}
+
+\end{document}
