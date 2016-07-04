@@ -110,15 +110,20 @@ public class AudioStreamer {
 		// Initialize
 		byte d1= (byte)(msg[0]>>4 & 0x0F);
 		byte d2= (byte)(msg[0]    & 0x0F);
+    int mean= 0;
 		decodedMsg[0]= (short) ((d1-8)*beta);
 		decodedMsg[1]= (short) ((d2-8)*beta+decodedMsg[0]);
+    mean+= decodedMsg[0]+decodedMsg[1];
 		// Iterate
 		for(int i=1; i<msg.length; i++){
 			d1= (byte)(msg[i]>>4 & 0x0F);
 			d2= (byte)(msg[i]    & 0x0F);
 			decodedMsg[2*i]=   (short) ((d1-8)*beta+decodedMsg[2*i-1]);
 			decodedMsg[2*i+1]= (short) ((d2-8)*beta+decodedMsg[2*i]  );
+      mean+= decodedMsg[2*i]+decodedMsg[2*i+1];
 		}
+    mean/= 2*msg.length;
+    for(int i=0; i<2*msg.length; i++) decodedMsg[i]+= mu-mean;
 		return decodedMsg;
 	}
 	private static short[] decodeAdaptive(byte[] msg){

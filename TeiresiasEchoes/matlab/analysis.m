@@ -59,7 +59,7 @@ clear('echo*','tw*','l*');
 %% Audio: G9-10
 
 fs= 8000;
-tonef= fopen(['../permLogs/',dir,'/toneV2065.log_samp']);
+tonef= fopen(['../permLogs/',dir,'/toneV2065.log_diff_samp']);
 tone= fread(tonef,'int16'); tonet= linspace(0,length(tone)/fs, length(tone));
 % message length = 256bytes
 tone= 2*(tone-mean(tone))/max(abs(tone));
@@ -73,7 +73,7 @@ spectrogram(tone,2000,1900,512,fs,'yaxis');
 title('G9: Tone spectrogram');
 saveas(gcf, ['results/',dir,'/G9.pdf']);
 
-musicf= fopen(['../permLogs/',dir,'/musicV2065.log_samp']);
+musicf= fopen(['../permLogs/',dir,'/musicV2065.log_diff_samp']);
 music= fread(musicf,'int16'); musict= linspace(0,length(music)/fs, length(music));
 music= 2*(music-mean(music))/max(abs(music));
 figure(10);

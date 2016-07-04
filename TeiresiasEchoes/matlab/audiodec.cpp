@@ -10,14 +10,19 @@ array<int16_t, 2*MSG_L> decode(int8_t* msg, int16_t mu, int16_t beta){
 
   int8_t d1= msg[0]>>4 & 0x0F;
   int8_t d2= msg[0]    & 0x0F;
-  decodedMsg[0]= (d1-8)*beta;
-  decodedMsg[1]= (d2-8)*beta+ decodedMsg[0];
-  for(int i=0; i<MSG_L; i++){
+  int mean= 0;
+  decodedMsg[0]= (d1-8)*beta + mu;
+  decodedMsg[1]= (d2-8)*beta + decodedMsg[0];
+  mean+= decodedMsg[0]+decodedMsg[1];
+  for(int i=1; i<MSG_L; i++){
     d1= msg[i]>>4 & 0x0F;
     d2= msg[i]    & 0x0F;
-    decodedMsg[2*i]= (d1-8)*beta + decodedMsg[2*i-1];
+    decodedMsg[2*i]=   (d1-8)*beta + decodedMsg[2*i-1];
     decodedMsg[2*i+1]= (d2-8)*beta + decodedMsg[2*i];
+    mean+= decodedMsg[2*i]+decodedMsg[2*i+1];
   }
+  mean/= 2*MSG_L;
+  for(int i=0; i<2*MSG_L; i++) decodedMsg[i]+= mu-mean;
   return decodedMsg;
 }
 
